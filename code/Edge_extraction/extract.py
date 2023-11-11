@@ -55,48 +55,55 @@ def canny(img, thresh1=THRESH1, thresh2=THRESH2):
     edges = cv.Canny(img, thresh1, thresh2)
     return 255 - edges
 
+def show_plots(image_path):
 
-image_folder = 'Images'
+    if image_path:
+        # Load the first image
+        original_image = imread(image_path)
+        original_image = cv.cvtColor(original_image, cv.COLOR_BGR2RGB)
 
-# Get the image from the dataset folder
-IMAGE_INDEX = 34
+        # Apply edge extraction methods
+        xdog_image = xdog(original_image)
+        sobel_image = sobel(original_image)
+        canny_image = canny(original_image)
 
-image_files = glob.glob(os.path.join(image_folder, '*.jpg'))
-first_image_path = image_files[IMAGE_INDEX] if image_files else None
+    # Median of three edge detectors
+        med_edges = np.median([xdog_image, sobel_image, canny_image], axis=0)
 
-if first_image_path:
-    # Load the first image
-    original_image = imread(first_image_path)
-    original_image = cv.cvtColor(original_image, cv.COLOR_BGR2RGB)
+        # Plotting the results
+        fig, axes = plt.subplots(1, 5, figsize=(25, 5))
+        axes[0].imshow(original_image)
+        axes[0].set_title('Original Image')
+        axes[0].axis('off')
 
-    # Apply edge extraction methods
-    xdog_image = xdog(original_image)
-    sobel_image = sobel(original_image)
-    canny_image = canny(original_image)
+        axes[1].imshow(xdog_image, cmap='gray')
+        axes[1].set_title('XDoG Edge Detection')
+        axes[1].axis('off')
 
-  # Median of three edge detectors
-    med_edges = np.median([xdog_image, sobel_image, canny_image], axis=0)
+        axes[2].imshow(sobel_image, cmap='gray')
+        axes[2].set_title('Sobel Edge Detection')
+        axes[2].axis('off')
 
-    # Plotting the results
-    fig, axes = plt.subplots(1, 5, figsize=(25, 5))
-    axes[0].imshow(original_image)
-    axes[0].set_title('Original Image')
-    axes[0].axis('off')
+        axes[3].imshow(canny_image, cmap='gray')
+        axes[3].set_title('Canny Edge Detection')
+        axes[3].axis('off')
 
-    axes[1].imshow(xdog_image, cmap='gray')
-    axes[1].set_title('XDoG Edge Detection')
-    axes[1].axis('off')
+        axes[4].imshow(med_edges, cmap='gray')
+        axes[4].set_title('Median of Edge Detectors')
+        axes[4].axis('off')
 
-    axes[2].imshow(sobel_image, cmap='gray')
-    axes[2].set_title('Sobel Edge Detection')
-    axes[2].axis('off')
+        plt.show()
 
-    axes[3].imshow(canny_image, cmap='gray')
-    axes[3].set_title('Canny Edge Detection')
-    axes[3].axis('off')
 
-    axes[4].imshow(med_edges, cmap='gray')
-    axes[4].set_title('Median of Edge Detectors')
-    axes[4].axis('off')
+if __name__ == '__main__':
 
-    plt.show()
+    image_folder = 'Images'
+
+    # Get the image from the dataset folder
+    IMAGE_INDEX = 34
+
+    image_files = glob.glob(os.path.join(image_folder, '*.jpg'))
+    image_path = image_files[IMAGE_INDEX] if image_files else None
+
+    show_plots(image_path)
+
