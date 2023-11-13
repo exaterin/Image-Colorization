@@ -55,6 +55,8 @@ def canny(img, thresh1=THRESH1, thresh2=THRESH2):
     edges = cv.Canny(img, thresh1, thresh2)
     return 255 - edges
 
+
+# Plot the results
 def show_plots(image_path):
 
     if image_path:
