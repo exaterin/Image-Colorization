@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from torchvision import datasets
 from torch.utils.data import Dataset
 from PIL import Image
 
