@@ -6,12 +6,10 @@ def read_ab_pairs(filename):
     ab_pairs = []
     with open(filename, 'r') as file:
         for line in file:
-            # Strip unwanted characters and split by comma
             clean_line = line.strip().replace('(', '').replace(')', '')
             a, b = map(float, clean_line.split(','))
             ab_pairs.append([a, b])
     return ab_pairs
-
 
 def visualize_ab_pairs_scatter(ab_pairs, L=50):
     # Extract separate lists for a and b values
@@ -36,14 +34,8 @@ def visualize_ab_pairs_scatter(ab_pairs, L=50):
     # Show the color plot
     plt.show()
 
-def plot_image(image):
-    plt.figure(figsize=(10, 10))
-    plt.imshow(image)
-    plt.axis('off')  # Hide axes
-    plt.show()
+if __name__ == "__main__":
 
-# Example usage
-filename = 'Dataset/unique_ab_pairs.txt'  # Update this to your actual filename
-ab_pairs = read_ab_pairs(filename)
-image = visualize_ab_pairs_scatter(ab_pairs)
-# plot_image(image)
+    filename = 'Dataset/unique_ab_pairs.txt'
+    ab_pairs = read_ab_pairs(filename)
+    image = visualize_ab_pairs_scatter(ab_pairs)

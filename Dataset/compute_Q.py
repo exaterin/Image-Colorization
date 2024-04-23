@@ -20,7 +20,7 @@ quantized_image = cv2.cvtColor(quantized_image, cv2.COLOR_LAB2BGR)
 cv2.imshow('Quantized Image', quantized_image)
 cv2.waitKey(0)
 
-# print the quantized ab channels
+# Print the quantized ab channels
 print(ab_channels)
 
 # Print all unique tuples (a, b) in the quantized ab channels

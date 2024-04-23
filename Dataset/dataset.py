@@ -92,6 +92,16 @@ class ImageDataset(Dataset):
         test_files = file_df[file_df['split'] == 'test']['filename'].tolist()
         return ImageDataset(image_folder, train_files, transform), ImageDataset(image_folder, test_files, transform)
     
+    @staticmethod
+    def read_ab_pairs(filename):
+        ab_pairs = []
+        with open(filename, 'r') as file:
+            for line in file:
+                clean_line = line.strip().replace('(', '').replace(')', '')
+                a, b = map(float, clean_line.split(','))
+                ab_pairs.append([a, b])
+        return ab_pairs
+
 
 if __name__ == '__main__':
     dataset = ImageDataset('/Users/ekaterinalipina/Bachelor Work/ekaterina-lipina/images/train')
