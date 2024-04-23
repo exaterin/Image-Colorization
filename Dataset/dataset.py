@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 from PIL import Image
 import numpy as np
 from skimage import color
+from tqdm import tqdm 
 
 class ImageDataset(Dataset):
     def __init__(self, image_folder, image_files=None, transform=None):
@@ -21,20 +22,50 @@ class ImageDataset(Dataset):
     def __getitem__(self, idx):
         image_name = self.image_files[idx]
         image_path = os.path.join(self.image_folder, image_name)
-        image = Image.open(image_path)
+        image = Image.open(image_path).convert('RGB')  # Ensure image is in RGB
 
         if self.transform:
             image = self.transform(image)
+        else:
+            image = self.to_lab(image)  # Convert to Lab and quantize here
+            image = self.quantize_ab_channels(image)
 
         return image
-    
-    def to_lab(image):
+
+    def to_lab(self, image):
         """
-        Convert a PIL image to Lab color space.
+        Convert an RGB image to Lab color space.
         """
         image = np.array(image)
         lab_image = color.rgb2lab(image)
         return lab_image
+
+    def quantize_ab_channels(self, lab_image):
+        """
+        Quantize ab channels of a Lab image.
+        """
+        ab_channels = lab_image[:, :, 1:]  # Extract ab channels
+        ab_channels = (ab_channels // 10) * 10 + 5  # Quantization
+        return ab_channels
+
+    def get_unique_ab_pairs(self):
+        """
+        Get all unique (a, b) pairs across the dataset.
+        """
+        unique_ab_pairs = set()
+
+        # 
+        for idx in tqdm(range(len(self)), desc="Processing Images"):
+            lab_image = self[idx]
+            unique_pairs = set(map(tuple, lab_image.reshape(-1, 2)))  # Collect unique pairs from this image
+            unique_ab_pairs.update(unique_pairs)
+
+            print(len(unique_ab_pairs))
+
+            if len(unique_ab_pairs) == 313:
+                return unique_ab_pairs
+            
+        return unique_ab_pairs
     
     @staticmethod
     def split_dataset(image_folder, test_size=0.2, path='Code/Splits',random_state=None, save_csv=False, transform=None):
@@ -63,9 +94,12 @@ class ImageDataset(Dataset):
     
 
 if __name__ == '__main__':
+    dataset = ImageDataset('/Users/ekaterinalipina/Bachelor Work/ekaterina-lipina/images/train')
+    unique_ab_pairs = dataset.get_unique_ab_pairs()
 
-    dataset = ImageDataset('Dataset/Images')
+    # Saving to a text file
+    with open('Dataset/unique_ab_pairs.txt', 'w') as file:
+        for pair in unique_ab_pairs:
+            file.write(f'{pair}\n')
 
-    # Show the first image
-    image = dataset[0]
-    image.show()
+    print(f'Total unique (a, b) pairs: {len(unique_ab_pairs)}')
