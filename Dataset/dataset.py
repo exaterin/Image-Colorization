@@ -1,20 +1,16 @@
 import os
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from torch.utils.data import Dataset
 from PIL import Image
 import numpy as np
 from skimage import color
-from tqdm import tqdm 
+from tqdm import tqdm
+from sklearn.model_selection import train_test_split
+from torch.utils.data import Dataset
 
 class ImageDataset(Dataset):
-    def __init__(self, image_folder, image_files=None, transform=None):
+    def __init__(self, image_folder):
         self.image_folder = image_folder
-        self.transform = transform
-        if image_files is None:
-            self.image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
-        else:
-            self.image_files = image_files
+        self.image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
 
     def __len__(self):
         return len(self.image_files)
@@ -24,13 +20,15 @@ class ImageDataset(Dataset):
         image_path = os.path.join(self.image_folder, image_name)
         image = Image.open(image_path).convert('RGB')  # Ensure image is in RGB
 
-        if self.transform:
-            image = self.transform(image)
-        else:
-            image = self.to_lab(image)  # Convert to Lab and quantize here
-            image = self.quantize_ab_channels(image)
+        image = ImageDataset.resize_and_pad(image) # Resize and pad the image
+        image = self.to_lab(image)  # Convert to Lab
+        ab_channels = self.quantize_ab_channels(image) # Quantize ab channels
+        L_channel = image[:, :, 0] # Get the L channel
+        L_channel = L_channel[:, :, np.newaxis] # Add a channel dimension
 
-        return image
+        print(L_channel.shape, ab_channels.shape)
+
+        return L_channel, ab_channels
 
     def to_lab(self, image):
         """
@@ -101,15 +99,33 @@ class ImageDataset(Dataset):
                 a, b = map(float, clean_line.split(','))
                 ab_pairs.append([a, b])
         return ab_pairs
+    
+    @staticmethod
+    def resize_and_pad(image, desired_size=256):
+        
+        ratio = float(desired_size) / max(image.size)
+        new_size = tuple([int(x * ratio) for x in image.size])
+        image = image.resize(new_size, Image.LANCZOS)
+        
+        # Create a new image and paste the resized on it
+        new_image = Image.new("RGB", (desired_size, desired_size))
+        new_image.paste(image, ((desired_size - new_size[0]) // 2, (desired_size - new_size[1]) // 2))
+        
+        return new_image
+
+
+def show_image(image):
+    """
+    Show an image.
+    """
+    lab_image = color.lab2rgb(image)
+    Image.fromarray((lab_image * 255).astype(np.uint8)).show()
 
 
 if __name__ == '__main__':
-    dataset = ImageDataset('/Users/ekaterinalipina/Bachelor Work/ekaterina-lipina/images/train')
-    unique_ab_pairs = dataset.get_unique_ab_pairs()
+    dataset = ImageDataset('Dataset/Images')
 
-    # Saving to a text file
-    with open('Dataset/unique_ab_pairs.txt', 'w') as file:
-        for pair in unique_ab_pairs:
-            file.write(f'{pair}\n')
+    # Show the first image
+    image = dataset[0]
 
-    print(f'Total unique (a, b) pairs: {len(unique_ab_pairs)}')
+    # show_image(image)
