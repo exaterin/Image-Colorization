@@ -6,9 +6,10 @@ from skimage import color
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
+import uuid
 
 class ImageDataset(Dataset):
-    def __init__(self, image_folder, ab_classes_path):
+    def __init__(self, image_folder, ab_classes_path, device='cuda'):
         self.image_folder = image_folder
         self.image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
         self.ab_classes = self.read_ab_pairs(ab_classes_path)
@@ -110,31 +111,6 @@ class ImageDataset(Dataset):
         return unique_ab_pairs
     
     @staticmethod
-    def split_dataset(image_folder, test_size=0.2, path='Code/Splits',random_state=None, save_csv=False, transform=None):
-        '''
-        Split the dataset into train and test sets
-        '''
-        image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
-        train_files, test_files = train_test_split(image_files, test_size=test_size, random_state=random_state)
-        if save_csv:
-            combined_list = [(file, 'train') for file in train_files] + [(file, 'test') for file in test_files]
-            combined_df = pd.DataFrame(combined_list, columns=['filename', 'split'])
-            if not os.path.exists(path):
-                os.makedirs(path)
-            combined_df.to_csv(f'{path}/combined_splits.csv', index=True)
-        return ImageDataset(image_folder, train_files, transform), ImageDataset(image_folder, test_files, transform)
-
-    @staticmethod
-    def create_split_from_csv(image_folder, csv_file='Code/Splits/combined_splits.csv', transform=None):
-        '''
-        Create a split from a csv file.
-        '''
-        file_df = pd.read_csv(csv_file)
-        train_files = file_df[file_df['split'] == 'train']['filename'].tolist()
-        test_files = file_df[file_df['split'] == 'test']['filename'].tolist()
-        return ImageDataset(image_folder, train_files, transform), ImageDataset(image_folder, test_files, transform)
-    
-    @staticmethod
     def read_ab_pairs(filename):
         ab_pairs = []
         with open(filename, 'r') as file:
@@ -163,7 +139,6 @@ class ImageDataset(Dataset):
         """
         ab_classes = np.argmax(one_hot_ab_classes, axis=2)
         ab_channels = np.array(self.ab_classes)[ab_classes]
-        ab_channels = ab_channels.reshape(256, 256, 2)
 
         image = np.concatenate((l_channel, ab_channels), axis=2)
 
@@ -176,6 +151,19 @@ class ImageDataset(Dataset):
         """
         lab_image = color.lab2rgb(image)
         Image.fromarray((lab_image * 255).astype(np.uint8)).show()
+
+    @staticmethod
+    def save_image(image, directory='Image-Colorisation/output', extension='png'):
+        """
+        Save an image to a file.
+        """
+        random_filename = str(uuid.uuid4()) + '.' + extension
+        file_path = os.path.join(directory, random_filename)
+
+        lab_image = color.lab2rgb(image)
+        rgb_image = (lab_image * 255).astype(np.uint8)
+        Image.fromarray(rgb_image).save(file_path)
+
 
 
 if __name__ == '__main__':
