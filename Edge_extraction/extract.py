@@ -8,6 +8,11 @@ from skimage.color import rgb2gray
 from cv2 import GaussianBlur, imread
 import matplotlib.pyplot as plt
 
+from PIL import Image
+import numpy as np
+import cv2 as cv
+from skimage.color import rgb2gray
+
 # Constants for XDoG line extraction
 GAMMA = 0.95
 SIGMA = 1
@@ -23,11 +28,13 @@ THRESH1 = 100
 THRESH2 = 200
 
 def xdog(image, gamma=GAMMA, sigma=SIGMA, k=K, epsilon=EPSILON, phi=PHI):
+    image = np.array(image.convert('L'))
+    image = np.array(image)
     if image.ndim == 3 and image.shape[2] == 3:
         image = rgb2gray(image)
 
-    image1 = GaussianBlur(image, (0, 0), sigma)
-    image2 = GaussianBlur(image, (0, 0), sigma * k)
+    image1 = cv.GaussianBlur(image, (0, 0), sigma)
+    image2 = cv.GaussianBlur(image, (0, 0), sigma * k)
 
     difference = image1 - gamma * image2
     mask = difference < epsilon
@@ -35,26 +42,29 @@ def xdog(image, gamma=GAMMA, sigma=SIGMA, k=K, epsilon=EPSILON, phi=PHI):
     difference[mask] = 1
     difference[~mask] = 1 + np.tanh(phi * difference[~mask])
 
-    # Normalize the difference to the range [0, 255]
     normalized_difference = (difference - difference.min()) / (difference.max() - difference.min())
-    return (normalized_difference * 255).astype(np.uint8)
+    return Image.fromarray((normalized_difference * 255).astype(np.uint8))
 
-def sobel(img, thresh=THRESH):
-
+def sobel(image, thresh=THRESH):
+    image = np.array(image.convert('L'))
+    img = np.array(image)
     if img.ndim == 3 and img.shape[2] == 3:
-        img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
 
-    mx = np.array( [[ -1, 0, 1 ], [ -2, 0, 2], [ -1, 0, 1]] )
-    gx = cv.filter2D(img, ddepth=-1, kernel=mx)
-    gy = cv.filter2D(img, ddepth=-1, kernel=np.rot90(mx))  
-    edges = np.hypot(gx, gy) >= thresh   
-    return (255 - (edges.astype(np.uint8) * 255)) 
+    mx = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    gx = cv.filter2D(img, -1, mx)
+    gy = cv.filter2D(img, -1, np.rot90(mx))
+    edges = np.hypot(gx, gy) >= thresh
 
+    return Image.fromarray((255 - (edges.astype(np.uint8) * 255)))
 
-def canny(img, thresh1=THRESH1, thresh2=THRESH2):
+def canny(image, thresh1=THRESH1, thresh2=THRESH2):
+    img = np.array(image)
+    if img.ndim == 3 and img.shape[2] == 3:
+        img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
+
     edges = cv.Canny(img, thresh1, thresh2)
-    return 255 - edges
-
+    return Image.fromarray(255 - edges)
 
 # Plot the results
 def show_plots(image_path):
@@ -101,7 +111,6 @@ if __name__ == '__main__':
 
     image_folder = 'Images'
 
-    # Get the image from the dataset folder
     IMAGE_INDEX = 34
 
     image_files = glob.glob(os.path.join(image_folder, '*.jpg'))
