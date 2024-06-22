@@ -19,6 +19,8 @@ def train(train_loader, dev_loader):
     model = CNNModel()
     model.summary()
 
+    model = model.to('cuda')
+
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     model.fit(train_loader, epochs=args.epochs, validation_data=dev_loader, verbose=1)
     
@@ -29,8 +31,10 @@ def train(train_loader, dev_loader):
 def test(model_path, test_loader, dataset):
     # # Load the model
     model = load_model(model_path, custom_objects={'CNNModel': CNNModel})
+    model = model.to('cuda')
 
     for img, label in test_loader:
+        img = img.to('cuda')
         output = model.predict(img)
 
         for lab_pred, grey_scale_img in zip(output, img):

@@ -6,13 +6,14 @@ from Edge_extraction.extract import sobel, canny, xdog
 
 st.title('Image Colorisation App')
 
+
 uploaded_file = st.file_uploader("Choose a file", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
-    image = Image.open(uploaded_file)
 
-    col1, col2 = st.columns(2) 
-    col1.image(image, caption='Original Image', use_column_width=True)
+    st.markdown("### Edge extractors")
+    
+    image = Image.open(uploaded_file)
 
     # Options for processing image
     option = st.selectbox(
@@ -41,4 +42,35 @@ if uploaded_file is not None:
         elif option == 'Xdog edge extractor':
             modified_image = xdog(image, gamma=gamma, sigma=sigma, k=k, epsilon=epsilon, phi=phi)
 
+        col1, col2 = st.columns(2) 
+        col1.image(image, caption='Original Image', use_column_width=True)
+
         col2.image(modified_image, caption='Extracted edges', use_column_width=True)
+
+
+    st.markdown("---")
+    st.markdown("### Compare Edge Extractors")
+
+     # Checkboxes for showing/hiding edge methods
+    show_original = st.checkbox('Original', value=True)
+    show_canny = st.checkbox('Canny Edge Detector', value=True)
+    show_sobel = st.checkbox('Sobel Edge Detector', value=True)
+    show_xdog = st.checkbox('XDoG Edge Detector', value=True)
+
+    # Button to apply selected methods
+    if st.button('Compare'):
+        images = {}
+        if show_original:
+            images['Original'] = image
+        if show_canny:
+            images['Canny'] = canny(image)
+        if show_sobel:
+            images['Sobel'] = sobel(image)
+        if show_xdog:
+            images['XDoG'] = xdog(image)
+
+        if images:
+            # Display images in a grid layout
+            cols = st.columns(len(images))
+            for col, (key, img) in zip(cols, images.items()):
+                col.image(img, caption=f'{key} Edge Detection', use_column_width=True)

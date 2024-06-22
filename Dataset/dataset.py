@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
 
 class ImageDataset(Dataset):
-    def __init__(self, image_folder, ab_classes_path):
+    def __init__(self, image_folder, ab_classes_path, device='cuda'):
         self.image_folder = image_folder
         self.image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
         self.ab_classes = self.read_ab_pairs(ab_classes_path)
@@ -108,31 +108,6 @@ class ImageDataset(Dataset):
                 return unique_ab_pairs
             
         return unique_ab_pairs
-    
-    @staticmethod
-    def split_dataset(image_folder, test_size=0.2, path='Code/Splits',random_state=None, save_csv=False, transform=None):
-        '''
-        Split the dataset into train and test sets
-        '''
-        image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
-        train_files, test_files = train_test_split(image_files, test_size=test_size, random_state=random_state)
-        if save_csv:
-            combined_list = [(file, 'train') for file in train_files] + [(file, 'test') for file in test_files]
-            combined_df = pd.DataFrame(combined_list, columns=['filename', 'split'])
-            if not os.path.exists(path):
-                os.makedirs(path)
-            combined_df.to_csv(f'{path}/combined_splits.csv', index=True)
-        return ImageDataset(image_folder, train_files, transform), ImageDataset(image_folder, test_files, transform)
-
-    @staticmethod
-    def create_split_from_csv(image_folder, csv_file='Code/Splits/combined_splits.csv', transform=None):
-        '''
-        Create a split from a csv file.
-        '''
-        file_df = pd.read_csv(csv_file)
-        train_files = file_df[file_df['split'] == 'train']['filename'].tolist()
-        test_files = file_df[file_df['split'] == 'test']['filename'].tolist()
-        return ImageDataset(image_folder, train_files, transform), ImageDataset(image_folder, test_files, transform)
     
     @staticmethod
     def read_ab_pairs(filename):
