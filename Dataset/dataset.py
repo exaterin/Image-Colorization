@@ -6,6 +6,7 @@ from skimage import color
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
+import uuid
 
 class ImageDataset(Dataset):
     def __init__(self, image_folder, ab_classes_path, device='cuda'):
@@ -16,6 +17,25 @@ class ImageDataset(Dataset):
     def __len__(self):
         return len(self.image_files)
 
+    # def __getitem__(self, idx):
+    #     image_name = self.image_files[idx]
+    #     image_path = os.path.join(self.image_folder, image_name)
+    #     image = Image.open(image_path).convert('RGB')  # Ensure image is in RGB
+
+    #     image = ImageDataset.resize_and_pad(image) # Resize and pad the image
+    #     image = self.to_lab(image)  # Convert to Lab
+    #     ab_channels = self.quantize_ab_channels(image) # Quantize ab channels
+
+    #     ab_classes = self.map_ab_to_class(ab_channels)  # Map ab channels to classes
+
+    #     one_hot_ab_classes = self.one_hot_encode(ab_classes, len(self.ab_classes))  # One-hot encode ab classes
+
+
+    #     L_channel = image[:, :, 0] # Get the L channel
+    #     L_channel = L_channel[:, :, np.newaxis] # Add a channel dimension
+
+    #     return L_channel, one_hot_ab_classes
+    
     def __getitem__(self, idx):
         image_name = self.image_files[idx]
         image_path = os.path.join(self.image_folder, image_name)
@@ -29,6 +49,11 @@ class ImageDataset(Dataset):
 
         one_hot_ab_classes = self.one_hot_encode(ab_classes, len(self.ab_classes))  # One-hot encode ab classes
 
+        
+        # image_path = os.path.join('sketches', image_name)
+        # sketch = Image.open(image_path).convert('RGB')
+        # sketch = ImageDataset.resize_and_pad(sketch)
+        # sketch = self.to_lab(sketch)
 
         L_channel = image[:, :, 0] # Get the L channel
         L_channel = L_channel[:, :, np.newaxis] # Add a channel dimension
@@ -138,7 +163,6 @@ class ImageDataset(Dataset):
         """
         ab_classes = np.argmax(one_hot_ab_classes, axis=2)
         ab_channels = np.array(self.ab_classes)[ab_classes]
-        ab_channels = ab_channels.reshape(256, 256, 2)
 
         image = np.concatenate((l_channel, ab_channels), axis=2)
 
@@ -151,6 +175,19 @@ class ImageDataset(Dataset):
         """
         lab_image = color.lab2rgb(image)
         Image.fromarray((lab_image * 255).astype(np.uint8)).show()
+
+    @staticmethod
+    def save_image(image, directory='Image-Colorisation/output', extension='png'):
+        """
+        Save an image to a file.
+        """
+        random_filename = str(uuid.uuid4()) + '.' + extension
+        file_path = os.path.join(directory, random_filename)
+
+        lab_image = color.lab2rgb(image)
+        rgb_image = (lab_image * 255).astype(np.uint8)
+        Image.fromarray(rgb_image).save(file_path)
+
 
 
 if __name__ == '__main__':

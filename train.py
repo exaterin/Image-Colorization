@@ -48,7 +48,7 @@ def test(model_path, test_loader, dataset):
 
 
 def main(args):
-    dataset = ImageDataset('/Users/ekaterinalipina/images/1000', 'Dataset/ab_classes.txt')
+    dataset = ImageDataset('images_small', 'Image-Colorisation/Dataset/ab_classes.txt')
 
     # Split the dataset into train, test and val sets
     generator = torch.Generator().manual_seed(42)
