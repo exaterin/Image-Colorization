@@ -55,7 +55,7 @@ def train(model, train_loader, dev_loader, criterion, optimizer, epochs):
 
         print(f"Epoch {epoch+1}/{epochs}, Training Loss: {running_loss/len(train_loader)}, Validation Loss: {val_loss/len(dev_loader)}")
 
-    torch.save(model.state_dict(), 'Model1.pth')
+    torch.save(model.state_dict(), 'Model_sketch.pth')
 
 def test(model_path, test_loader, dataset):
     model = CNNModel()
@@ -74,8 +74,7 @@ def test(model_path, test_loader, dataset):
             # Resize labels to match output size
             labels = F.interpolate(labels.unsqueeze(1).float(), size=outputs.shape[2:], mode='nearest').long().squeeze(1)
             
-            output = model(img)
-            for lab_pred, grey_scale_img in zip(output, img):
+            for lab_pred, grey_scale_img in zip(outputs, img):
                 lab_pred = lab_pred.permute(1, 2, 0)
                 grey_scale_img = grey_scale_img.permute(1, 2, 0)
 
@@ -97,7 +96,7 @@ def main(args):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    train(model, train_loader, dev_loader, criterion, optimizer, args.epochs)
+    # train(model, train_loader, dev_loader, criterion, optimizer, args.epochs)
 
     test(model_path='Model1.pth', test_loader=test_loader, dataset=dataset)
 

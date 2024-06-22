@@ -17,6 +17,25 @@ class ImageDataset(Dataset):
     def __len__(self):
         return len(self.image_files)
 
+    # def __getitem__(self, idx):
+    #     image_name = self.image_files[idx]
+    #     image_path = os.path.join(self.image_folder, image_name)
+    #     image = Image.open(image_path).convert('RGB')  # Ensure image is in RGB
+
+    #     image = ImageDataset.resize_and_pad(image) # Resize and pad the image
+    #     image = self.to_lab(image)  # Convert to Lab
+    #     ab_channels = self.quantize_ab_channels(image) # Quantize ab channels
+
+    #     ab_classes = self.map_ab_to_class(ab_channels)  # Map ab channels to classes
+
+    #     one_hot_ab_classes = self.one_hot_encode(ab_classes, len(self.ab_classes))  # One-hot encode ab classes
+
+
+    #     L_channel = image[:, :, 0] # Get the L channel
+    #     L_channel = L_channel[:, :, np.newaxis] # Add a channel dimension
+
+    #     return L_channel, one_hot_ab_classes
+    
     def __getitem__(self, idx):
         image_name = self.image_files[idx]
         image_path = os.path.join(self.image_folder, image_name)
@@ -30,6 +49,11 @@ class ImageDataset(Dataset):
 
         one_hot_ab_classes = self.one_hot_encode(ab_classes, len(self.ab_classes))  # One-hot encode ab classes
 
+        
+        # image_path = os.path.join('sketches', image_name)
+        # sketch = Image.open(image_path).convert('RGB')
+        # sketch = ImageDataset.resize_and_pad(sketch)
+        # sketch = self.to_lab(sketch)
 
         L_channel = image[:, :, 0] # Get the L channel
         L_channel = L_channel[:, :, np.newaxis] # Add a channel dimension

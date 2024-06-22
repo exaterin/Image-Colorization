@@ -28,7 +28,6 @@ THRESH1 = 100
 THRESH2 = 200
 
 def xdog(image, gamma=GAMMA, sigma=SIGMA, k=K, epsilon=EPSILON, phi=PHI):
-    image = np.array(image.convert('L'))
     image = np.array(image)
     if image.ndim == 3 and image.shape[2] == 3:
         image = rgb2gray(image)
@@ -104,7 +103,7 @@ def show_plots(image_path):
         axes[4].set_title('Median of Edge Detectors')
         axes[4].axis('off')
 
-        plt.show()
+        plt.savefig('fig.png')
 
 
 if __name__ == '__main__':

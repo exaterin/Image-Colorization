@@ -3,3 +3,5 @@ Images
 venv
 Model1.keras
 output
+output_rgb
+output_sketch
