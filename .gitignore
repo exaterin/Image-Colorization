@@ -6,3 +6,4 @@ output
 output_rgb
 output_sketch
 .vscode
+*.pyc
