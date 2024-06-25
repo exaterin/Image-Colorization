@@ -1,20 +1,17 @@
 import os
-import pandas as pd
 from PIL import Image
 import numpy as np
-from skimage import color
-from tqdm import tqdm
-from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
-import uuid
 
 import utils
 
 class ImageDataset(Dataset):
-    def __init__(self, image_folder, ab_classes_path, device='cuda'):
+    def __init__(self, image_folder, ab_classes_path):
         self.image_folder = image_folder
         self.image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
-        self.ab_classes = utils.read_ab_pairs(ab_classes_path)
+
+        if ab_classes_path:
+            self.ab_classes = utils.read_ab_pairs(ab_classes_path)
 
     def __len__(self):
         return len(self.image_files)

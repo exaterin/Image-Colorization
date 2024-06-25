@@ -1,3 +1,7 @@
+# Ignore Python compiled files
+*.pyc
+__pycache__/
+
 Papers
 Images
 venv
@@ -6,4 +10,3 @@ output
 output_rgb
 output_sketch
 .vscode
-*.pyc

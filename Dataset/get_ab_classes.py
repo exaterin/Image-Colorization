@@ -98,6 +98,6 @@ def create_ab_classes(dataset, filename):
 
 
 if __name__ == "__main__":
-    dataset = ImageDataset('Dataset/Images', ab_classes_path='Dataset/ab_classes.txt')
+    dataset = ImageDataset('Dataset/Images', ab_classes_path=None)
 
     create_ab_classes(dataset, filename='Dataset/ab_classes.txt')

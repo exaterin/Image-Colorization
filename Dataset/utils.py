@@ -3,7 +3,9 @@ from PIL import Image
 from skimage import color
 import os
 import uuid
+from tqdm import tqdm
 
+from Edge_extraction.extract import extract
 
 def show_image(image):
     """
@@ -160,9 +162,29 @@ def save_image(image, directory='Image-Colorisation/output'):
     image (numpy array): Image to be saved.
     directory (str): Directory to save the image.
     """
-    random_filename = str(uuid.uuid4()) + '.' + 'PNG'
+    random_filename = str(uuid.uuid4()) + '.' + 'png'
     file_path = os.path.join(directory, random_filename)
 
     lab_image = color.lab2rgb(image)
     rgb_image = (lab_image * 255).astype(np.uint8)
     Image.fromarray(rgb_image).save(file_path)
+
+
+def create_sketches(input_folder, output_folder):
+    """
+    Create sketches from images using the XDoG edge detection method and save them to the output folder.
+
+    Parameters:
+    input_folder (str): The folder containing the input images.
+    output_folder (str): The folder where the generated sketches will be saved.
+    """
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    for filename in tqdm(os.listdir(input_folder)):
+        if filename.lower().endswith(('.jpg')):
+            image_path = os.path.join(input_folder, filename)
+            image = Image.open(image_path)
+            sketch = extract.xdog(image)
+            sketch_path = os.path.join(output_folder, filename)
+            sketch.save(sketch_path)
