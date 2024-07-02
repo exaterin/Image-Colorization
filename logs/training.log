@@ -1,0 +1,2 @@
+2024-06-26 21:03:39,132 - INFO - Model path: Model3.pth, Epoch 1/1, Training Loss: 3.7062495225617864, Validation Loss: 3.716008989016215
+2024-06-26 21:38:45,670 - INFO - Model path: Model3.pth, Epoch 1/1, Training Loss: 3.7161157091124717, Validation Loss: 3.4362104574839276
