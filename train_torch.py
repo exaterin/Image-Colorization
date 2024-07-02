@@ -5,7 +5,7 @@ import torch.optim as optim
 from torch.utils.data import random_split, DataLoader
 from tqdm import tqdm
 from ModelCNN.cnn_model_torch import CNNModel
-from Dataset.dataset import ImageDataset
+from DatasetLAB.dataset import ImageDataset
 import torch.nn.functional as F
 
 parser = argparse.ArgumentParser()
