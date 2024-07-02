@@ -2,13 +2,16 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import random_split, DataLoader
+import matplotlib.pyplot as plt
 from tqdm import tqdm
+import logging
+import os
+from datetime import datetime
+
+from torch.utils.data import random_split, DataLoader
 from ModelRGB.rgb_model import ModelRGB
 from DatasetRGB.dataset import ImageDatasetRGB
 from DatasetRGB.utils import save_rgb_image
-import torch.nn.functional as F
-import matplotlib.pyplot as plt
 
 
 parser = argparse.ArgumentParser()
@@ -18,6 +21,16 @@ parser.add_argument("--lr", default=0.001, type=float, help="Learning rate.")
 parser.add_argument("--image_folder", default="DatasetLAB/Images", type=str, help="Path to the image folder.")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def setup_logging(log_dir):
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    log_file = os.path.join(log_dir, f'training_{timestamp}.log')
+    logging.basicConfig(filename=log_file, level=logging.INFO, 
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.info(f"Logging setup complete. Log file: {log_file}")
+
 
 def train(model, train_loader, dev_loader, criterion, optimizer, epochs, model_name):
     model.to(device)
@@ -39,6 +52,7 @@ def train(model, train_loader, dev_loader, criterion, optimizer, epochs, model_n
             optimizer.step()
             running_loss += loss.item()
             train_loader_tqdm.set_postfix(loss=loss.item())
+            
 
         model.eval()
         val_loss = 0.0
@@ -51,6 +65,9 @@ def train(model, train_loader, dev_loader, criterion, optimizer, epochs, model_n
                 outputs = model(gray_images)
                 loss = criterion(outputs, rgb_images)
                 val_loss += loss.item()
+
+        
+        logging.info(f"Model: {model_name}, Epoch {epoch+1}/{epochs}, Training Loss: {running_loss/len(train_loader)}, Validation Loss: {val_loss/len(dev_loader)} ")
 
         print(f"Epoch {epoch+1}/{epochs}, Training Loss: {running_loss/len(train_loader)}, Validation Loss: {val_loss/len(dev_loader)}")
 
@@ -74,6 +91,9 @@ def test(model_path, test_loader):
                 save_rgb_image(outputs[i], image_name[i], 'output')
 
 def main(args):
+
+    setup_logging('logs')
+
     dataset = ImageDatasetRGB(args.image_folder)
 
     # Split the dataset into train, test and val sets
@@ -88,23 +108,14 @@ def main(args):
     criterion = nn.MSELoss()  # Using MSE loss for image reconstruction
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name='Model_RGB.pth')
+    model_name = 'Model_RGB.pth'
+
+    logging.info(f"Model file: {model_name}")
+
+    train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name)
 
     # test(model_path='Model_RGB.pth', test_loader=test_loader)
 
 if __name__ == '__main__':
-    # args = parser.parse_args([] if "__file__" not in globals() else None)
-    # main(args)
-
-    dataset = ImageDatasetRGB('DatasetLAB/Images')
-
-    # Show the first image
-    grey, rgb, _ = dataset[0]
-
-    print(grey.shape, rgb.shape)
-
-    # Display the RGB image
-    plt.imshow(rgb)
-    plt.title("RGB Image")
-    plt.axis('off')  # Hide the axes
-    plt.show()
+    args = parser.parse_args([] if "__file__" not in globals() else None)
+    main(args)
