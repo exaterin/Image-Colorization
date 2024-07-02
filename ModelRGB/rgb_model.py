@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class ModelRGB(nn.Module):
-   def __init__(self):
+    def __init__(self):
         super(ModelRGB, self).__init__()
 
         def conv_block(in_channels, out_channels, kernel_size=3, stride=2, padding=1):
@@ -36,29 +36,29 @@ class ModelRGB(nn.Module):
         self.dec5 = deconv_block(256, 64)  # 64x64x256 -> 128x128x64
         self.dec6 = deconv_block(128, 3)  # 128x128x128 -> 256x256x3
 
-def forward(self, x):
-    # Encoding
-    e1 = self.enc1(x)
-    e2 = self.enc2(e1)
-    e3 = self.enc3(e2)
-    e4 = self.enc4(e3)
-    e5 = self.enc5(e4)
-    e6 = self.enc6(e5)
+    def forward(self, x):
+        # Encoding
+        e1 = self.enc1(x)
+        e2 = self.enc2(e1)
+        e3 = self.enc3(e2)
+        e4 = self.enc4(e3)
+        e5 = self.enc5(e4)
+        e6 = self.enc6(e5)
 
-    # Decoding + Concatenating with encoding layers
-    d1 = self.dec1(e6)
-    d1 = torch.cat((d1, e5), dim=1)
-    d2 = self.dec2(d1)
-    d2 = torch.cat((d2, e4), dim=1)
-    d3 = self.dec3(d2)
-    d3 = torch.cat((d3, e3), dim=1)
-    d4 = self.dec4(d3)
-    d4 = torch.cat((d4, e2), dim=1)
-    d5 = self.dec5(d4)
-    d5 = torch.cat((d5, e1), dim=1)
-    d6 = self.dec6(d5)
+        # Decoding + Concatenating with encoding layers
+        d1 = self.dec1(e6)
+        d1 = torch.cat((d1, e5), dim=1)
+        d2 = self.dec2(d1)
+        d2 = torch.cat((d2, e4), dim=1)
+        d3 = self.dec3(d2)
+        d3 = torch.cat((d3, e3), dim=1)
+        d4 = self.dec4(d3)
+        d4 = torch.cat((d4, e2), dim=1)
+        d5 = self.dec5(d4)
+        d5 = torch.cat((d5, e1), dim=1)
+        d6 = self.dec6(d5)
 
-    return torch.sigmoid(d6)
+        return torch.sigmoid(d6)
 
 
 if __name__ == '__main__':

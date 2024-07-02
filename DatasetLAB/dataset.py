@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 from torch.utils.data import Dataset
 
-from Dataset.utils import read_ab_pairs, resize_and_pad, to_lab, quantize_ab_channels, map_ab_to_class, one_hot_encode
+from utils import read_ab_pairs, resize_and_pad, to_lab, quantize_ab_channels, map_ab_to_class, one_hot_encode
 
 class ImageDataset(Dataset):
     def __init__(self, image_folder, ab_classes_path):

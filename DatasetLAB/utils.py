@@ -154,7 +154,7 @@ def get_img_from_one_hot(l_channel, one_hot_ab_classes, ab_classes):
 
     return image
 
-def save_image(image,  image_name, directory='Image-Colorisation/output'):
+def save_image(image, image_name, directory='Image-Colorisation/output'):
     """
     Save an image to a file.
     
@@ -165,7 +165,7 @@ def save_image(image,  image_name, directory='Image-Colorisation/output'):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    file_path = os.path.join(directory, image_name + '.' + 'png')
+    file_path = os.path.join(directory, f"{image_name}.png")
 
     lab_image = color.lab2rgb(image)
     rgb_image = (lab_image * 255).astype(np.uint8)

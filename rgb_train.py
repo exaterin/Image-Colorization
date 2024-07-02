@@ -4,9 +4,12 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import random_split, DataLoader
 from tqdm import tqdm
-from ModelRGB import ModelRGB
-from DatasetRGB import ImageDatasetRGB
+from ModelRGB.rgb_model import ModelRGB
+from DatasetRGB.dataset import ImageDatasetRGB
+from DatasetRGB.utils import save_rgb_image
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--batch_size", default=32, type=int, help="Batch size.")
@@ -16,14 +19,14 @@ parser.add_argument("--image_folder", default="DatasetLAB/Images", type=str, hel
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def train(model, train_loader, dev_loader, criterion, optimizer, epochs):
+def train(model, train_loader, dev_loader, criterion, optimizer, epochs, model_name):
     model.to(device)
     for epoch in range(epochs):
         model.train()
         running_loss = 0.0
         train_loader_tqdm = tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}")
 
-        for gray_images, rgb_images in train_loader_tqdm:
+        for gray_images, rgb_images, _ in train_loader_tqdm:
             gray_images, rgb_images = gray_images.to(device).float(), rgb_images.to(device).float()
             gray_images = gray_images.permute(0, 3, 1, 2)
             rgb_images = rgb_images.permute(0, 3, 1, 2)
@@ -40,7 +43,7 @@ def train(model, train_loader, dev_loader, criterion, optimizer, epochs):
         model.eval()
         val_loss = 0.0
         with torch.no_grad():
-            for gray_images, rgb_images in dev_loader:
+            for gray_images, rgb_images, _ in dev_loader:
                 gray_images, rgb_images = gray_images.to(device).float(), rgb_images.to(device).float()
                 gray_images = gray_images.permute(0, 3, 1, 2)
                 rgb_images = rgb_images.permute(0, 3, 1, 2)
@@ -51,7 +54,7 @@ def train(model, train_loader, dev_loader, criterion, optimizer, epochs):
 
         print(f"Epoch {epoch+1}/{epochs}, Training Loss: {running_loss/len(train_loader)}, Validation Loss: {val_loss/len(dev_loader)}")
 
-    torch.save(model.state_dict(), 'Model_RGB.pth')
+    torch.save(model.state_dict(), model_name)
 
 def test(model_path, test_loader):
     model = ModelRGB()
@@ -60,14 +63,15 @@ def test(model_path, test_loader):
     model.eval()
 
     with torch.no_grad():
-        for gray_images, rgb_images in tqdm(test_loader, desc="Testing"):
+        for gray_images, rgb_images, image_name in tqdm(test_loader, desc="Testing"):
             gray_images, rgb_images = gray_images.to(device).float(), rgb_images.to(device).float()
             gray_images = gray_images.permute(0, 3, 1, 2)
             rgb_images = rgb_images.permute(0, 3, 1, 2)
 
             outputs = model(gray_images)
             
-            # Here you can save or visualize the results if needed
+            for i in range(outputs.size(0)):
+                save_rgb_image(outputs[i], image_name[i], 'output')
 
 def main(args):
     dataset = ImageDatasetRGB(args.image_folder)
@@ -84,10 +88,23 @@ def main(args):
     criterion = nn.MSELoss()  # Using MSE loss for image reconstruction
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    train(model, train_loader, dev_loader, criterion, optimizer, args.epochs)
+    train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name='Model_RGB.pth')
 
-    test(model_path='Model_RGB.pth', test_loader=test_loader)
+    # test(model_path='Model_RGB.pth', test_loader=test_loader)
 
 if __name__ == '__main__':
-    args = parser.parse_args([] if "__file__" not in globals() else None)
-    main(args)
+    # args = parser.parse_args([] if "__file__" not in globals() else None)
+    # main(args)
+
+    dataset = ImageDatasetRGB('DatasetLAB/Images')
+
+    # Show the first image
+    grey, rgb, _ = dataset[0]
+
+    print(grey.shape, rgb.shape)
+
+    # Display the RGB image
+    plt.imshow(rgb)
+    plt.title("RGB Image")
+    plt.axis('off')  # Hide the axes
+    plt.show()

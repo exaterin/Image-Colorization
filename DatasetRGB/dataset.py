@@ -2,8 +2,10 @@ import os
 from PIL import Image
 import numpy as np
 from torch.utils.data import Dataset
+import matplotlib.pyplot as plt
 
-from utils import resize_and_pad
+from DatasetRGB.utils import resize_and_pad
+
 
 class ImageDatasetRGB(Dataset):
     def __init__(self, image_folder):
@@ -32,13 +34,6 @@ class ImageDatasetRGB(Dataset):
         # Normalize RGB image
         rgb_image = image_np.astype(np.float32) / 255.0
 
-        return gray_image, rgb_image
-    
+        img_name = os.path.basename(image_path).split('.')[0]
 
-if __name__ == '__main__':
-    dataset = ImageDatasetRGB('DatasetLAB/Images')
-
-    # Show the first image
-    grey, rgb = dataset[5]
-
-    print(grey.shape, rgb.shape)
+        return gray_image, rgb_image, img_name
