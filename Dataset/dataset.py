@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 from torch.utils.data import Dataset
 
-import utils
+from Dataset.utils import read_ab_pairs, resize_and_pad, to_lab, quantize_ab_channels, map_ab_to_class, one_hot_encode
 
 class ImageDataset(Dataset):
     def __init__(self, image_folder, ab_classes_path):
@@ -11,7 +11,7 @@ class ImageDataset(Dataset):
         self.image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
 
         if ab_classes_path:
-            self.ab_classes = utils.read_ab_pairs(ab_classes_path)
+            self.ab_classes = read_ab_pairs(ab_classes_path)
 
     def __len__(self):
         return len(self.image_files)
@@ -22,36 +22,38 @@ class ImageDataset(Dataset):
         image = Image.open(image_path).convert('RGB')  # Ensure image is in RGB
 
         # Resize and pad the image
-        image = utils.resize_and_pad(image)
+        image = resize_and_pad(image)
 
         # Convert to Lab
-        lab_image = utils.to_lab(image)
+        lab_image = to_lab(image)
         
         # Quantize ab channels
-        ab_channels = utils.quantize_ab_channels(lab_image)
+        ab_channels = quantize_ab_channels(lab_image)
 
         # Map ab channels to classes
-        ab_classes = utils.map_ab_to_class(ab_channels, self.ab_classes)
+        ab_classes = map_ab_to_class(ab_channels, self.ab_classes)
 
         # One-hot encode ab classes
-        one_hot_ab_classes = utils.one_hot_encode(ab_classes, len(self.ab_classes))
+        one_hot_ab_classes = one_hot_encode(ab_classes, len(self.ab_classes))
 
         # Get the L channel
         L_channel = lab_image[:, :, 0]
         # Add a channel dimension
         L_channel = L_channel[:, :, np.newaxis]
 
-        return L_channel, one_hot_ab_classes
+        img_name = os.path.basename(image_path).split('.')[0]
+
+        return L_channel, one_hot_ab_classes, img_name
     
 
-if __name__ == '__main__':
-    dataset = ImageDataset('Dataset/Images', ab_classes_path='Dataset/ab_classes.txt')
+# if __name__ == '__main__':
+#     dataset = ImageDataset('Dataset/Images', ab_classes_path='Dataset/ab_classes.txt')
 
-    # Show the first image
-    image = dataset[5]
+#     # Show the first image
+#     image = dataset[5]
 
-    image = utils.get_img_from_one_hot(image[0], image[1], dataset.ab_classes)
+#     image = utils.get_img_from_one_hot(image[0], image[1], dataset.ab_classes)
 
-    print(image.shape)
+#     print(image.shape)
 
-    utils.show_image(image)
+#     utils.show_image(image)

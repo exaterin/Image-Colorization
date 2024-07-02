@@ -5,7 +5,7 @@ import os
 import uuid
 from tqdm import tqdm
 
-from Edge_extraction.extract import extract
+from Edge_extraction.extract import xdog
 
 def show_image(image):
     """
@@ -154,7 +154,7 @@ def get_img_from_one_hot(l_channel, one_hot_ab_classes, ab_classes):
 
     return image
 
-def save_image(image, directory='Image-Colorisation/output'):
+def save_image(image,  image_name, directory='Image-Colorisation/output'):
     """
     Save an image to a file.
     
@@ -162,8 +162,10 @@ def save_image(image, directory='Image-Colorisation/output'):
     image (numpy array): Image to be saved.
     directory (str): Directory to save the image.
     """
-    random_filename = str(uuid.uuid4()) + '.' + 'png'
-    file_path = os.path.join(directory, random_filename)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    file_path = os.path.join(directory, image_name + '.' + 'png')
 
     lab_image = color.lab2rgb(image)
     rgb_image = (lab_image * 255).astype(np.uint8)
@@ -185,6 +187,6 @@ def create_sketches(input_folder, output_folder):
         if filename.lower().endswith(('.jpg')):
             image_path = os.path.join(input_folder, filename)
             image = Image.open(image_path)
-            sketch = extract.xdog(image)
+            sketch = xdog(image)
             sketch_path = os.path.join(output_folder, filename)
             sketch.save(sketch_path)
