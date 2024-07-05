@@ -1,0 +1,12 @@
+2024-07-04 11:37:35,548 - INFO - Logging setup complete. Log file: Image-Colorisation/logs/training_20240704_113735.log
+2024-07-04 11:37:38,581 - INFO - Model file: Model_lab.pth
+2024-07-04 11:56:43,979 - INFO - Model: Model_lab.pth, Epoch 1/10, Training Loss: 3.7877898446652067, Validation Loss: 6.473527606328329 
+2024-07-04 12:15:47,056 - INFO - Model: Model_lab.pth, Epoch 2/10, Training Loss: 3.330524584826301, Validation Loss: 3.612405506769816 
+2024-07-04 12:34:55,299 - INFO - Model: Model_lab.pth, Epoch 3/10, Training Loss: 3.16041748163079, Validation Loss: 3.3084065834681193 
+2024-07-04 12:54:03,167 - INFO - Model: Model_lab.pth, Epoch 4/10, Training Loss: 3.0174517821864923, Validation Loss: 5.4653564453125 
+2024-07-04 13:13:00,484 - INFO - Model: Model_lab.pth, Epoch 5/10, Training Loss: 2.871577006428182, Validation Loss: 2.8170848369598387 
+2024-07-04 13:32:06,908 - INFO - Model: Model_lab.pth, Epoch 6/10, Training Loss: 2.745027337755476, Validation Loss: 2.9184055884679156 
+2024-07-04 13:51:27,317 - INFO - Model: Model_lab.pth, Epoch 7/10, Training Loss: 2.635928332304754, Validation Loss: 2.6077710231145224 
+2024-07-04 14:10:43,026 - INFO - Model: Model_lab.pth, Epoch 8/10, Training Loss: 2.541598119655577, Validation Loss: 2.5466748237609864 
+2024-07-04 14:29:51,842 - INFO - Model: Model_lab.pth, Epoch 9/10, Training Loss: 2.4646757931268515, Validation Loss: 2.4314090331395466 
+2024-07-04 14:49:01,393 - INFO - Model: Model_lab.pth, Epoch 10/10, Training Loss: 2.393678470819938, Validation Loss: 2.4406734625498454 

@@ -2,25 +2,21 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import matplotlib.pyplot as plt
-from tqdm import tqdm
 import logging
 import os
 from datetime import datetime
-from PIL import Image
-import numpy as np
-
 from torch.utils.data import random_split, DataLoader
-from Models.rgb_model import ModelRGB
-from Datasets.dataset_rgb import ImageDatasetRGB
+from Models.inception_model import ModelInception
+from Datasets.dataset_inception import ImageDatasetInception
 from Datasets.utils import save_rgb_image
-
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--batch_size", default=32, type=int, help="Batch size.")
 parser.add_argument("--epochs", default=10, type=int, help="Number of epochs.")
 parser.add_argument("--lr", default=0.001, type=float, help="Learning rate.")
 parser.add_argument("--image_folder", default="images", type=str, help="Path to the image folder.")
+parser.add_argument("--feature_folder", default="features_sketches", type=str, help="Path to the feature folder.")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -33,7 +29,6 @@ def setup_logging(log_dir):
                         format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info(f"Logging setup complete. Log file: {log_file}")
 
-
 def train(model, train_loader, dev_loader, criterion, optimizer, epochs, model_name):
     model.to(device)
     for epoch in range(epochs):
@@ -41,64 +36,64 @@ def train(model, train_loader, dev_loader, criterion, optimizer, epochs, model_n
         running_loss = 0.0
         train_loader_tqdm = tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}")
 
-        for gray_images, rgb_images, _ in train_loader_tqdm:
+        for gray_images, rgb_images, feature_vectors, _ in train_loader_tqdm:
             gray_images, rgb_images = gray_images.to(device).float(), rgb_images.to(device).float()
+            feature_vectors = feature_vectors.to(device).float()
+
             gray_images = gray_images.permute(0, 3, 1, 2)
             rgb_images = rgb_images.permute(0, 3, 1, 2)
             
             optimizer.zero_grad()
-            outputs = model(gray_images)
+            outputs = model(gray_images, feature_vectors)
             
             loss = criterion(outputs, rgb_images)
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
             train_loader_tqdm.set_postfix(loss=loss.item())
-            
 
         model.eval()
         val_loss = 0.0
         with torch.no_grad():
-            for gray_images, rgb_images, _ in dev_loader:
+            for gray_images, rgb_images, feature_vectors, _ in dev_loader:
                 gray_images, rgb_images = gray_images.to(device).float(), rgb_images.to(device).float()
+                feature_vectors = feature_vectors.to(device).float()
+
                 gray_images = gray_images.permute(0, 3, 1, 2)
                 rgb_images = rgb_images.permute(0, 3, 1, 2)
                 
-                outputs = model(gray_images)
+                outputs = model(gray_images, feature_vectors)
                 loss = criterion(outputs, rgb_images)
                 val_loss += loss.item()
 
-        
-        logging.info(f"Model: {model_name}, Epoch {epoch+1}/{epochs}, Training Loss: {running_loss/len(train_loader)}, Validation Loss: {val_loss/len(dev_loader)} ")
-
+        logging.info(f"Model: {model_name}, Epoch {epoch+1}/{epochs}, Training Loss: {running_loss/len(train_loader)}, Validation Loss: {val_loss/len(dev_loader)}")
         print(f"Epoch {epoch+1}/{epochs}, Training Loss: {running_loss/len(train_loader)}, Validation Loss: {val_loss/len(dev_loader)}")
 
     torch.save(model.state_dict(), f'Image-Colorisation/{model_name}')
 
 def test(model_path, test_loader):
-    model = ModelRGB()
+    model = ModelInception()
     model.load_state_dict(torch.load(model_path))
     model.to(device)
     model.eval()
 
     with torch.no_grad():
-        for gray_images, rgb_images, image_name in tqdm(test_loader, desc="Testing"):
+        for gray_images, rgb_images, feature_vectors, image_name in tqdm(test_loader, desc="Testing"):
             gray_images, rgb_images = gray_images.to(device).float(), rgb_images.to(device).float()
+            feature_vectors = feature_vectors.to(device).float()
+
             gray_images = gray_images.permute(0, 3, 1, 2)
             rgb_images = rgb_images.permute(0, 3, 1, 2)
 
-            outputs = model(gray_images)
+            outputs = model(gray_images, feature_vectors)
 
-            # print("Output min:", outputs.min().item(), "Output max:", outputs.max().item())
-            
             for i in range(outputs.size(0)):
                 save_rgb_image(outputs[i], image_name[i], f'Image-Colorisation/output_{model_path}')
 
 def main(args):
-
     setup_logging('Image-Colorisation/logs')
 
-    dataset = ImageDatasetRGB(args.image_folder, 'sketches')
+    dataset = ImageDatasetInception(args.image_folder, args.feature_folder, 'sketches')
 
     # Split the dataset into train, test and val sets
     generator = torch.Generator().manual_seed(42)
@@ -108,28 +103,17 @@ def main(args):
     dev_loader = DataLoader(val_dataset, batch_size=args.batch_size)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size)
 
-    model = ModelRGB()
+    model = ModelInception()
     criterion = nn.MSELoss()  # Using MSE loss for image reconstruction
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    model_name = 'Model_RGB.pth'
+    model_name = 'Model_Inception_sketch.pth'
 
     logging.info(f"Model file: {model_name}")
 
-    # train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name)
-
-    test(model_path=model_name, test_loader=test_loader)
+    train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name)
+    # test(model_path=model_name, test_loader=test_loader)
 
 if __name__ == '__main__':
     args = parser.parse_args([] if "__file__" not in globals() else None)
     main(args)
-
-    # dataset = ImageDatasetRGB('images', 'sketches')
-
-    # sketch, rgb, name = dataset[0]
-    # sketch = np.squeeze(sketch, axis=2)
-
-    # sketch = (sketch * 255).astype(np.uint8)
-
-    # sketch_image = Image.fromarray(sketch)
-    # sketch_image.save(f"Image-Colorisation/{name}_sketch.png")

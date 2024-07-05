@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchviz import make_dot
 
 def same_padding(kernel_size, stride, dilation=1):
     return ((stride - 1) + dilation * (kernel_size - 1)) // 2
@@ -104,3 +105,12 @@ class CNNModel(nn.Module):
 if __name__ == '__main__':
     model = CNNModel()
     print(model)
+
+    x = torch.randn(1, 1, 256, 256)
+    y = model(x)
+
+
+    dot = make_dot(y, params=dict(model.named_parameters()))
+
+    dot.format = 'png'
+    dot.render('Image-Colorisation/refc_cnn_model')

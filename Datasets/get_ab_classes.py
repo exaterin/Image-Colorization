@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from skimage.color import lab2rgb
 from tqdm import tqdm
 
-from dataset import ImageDataset
+from DatasetLAB.dataset_lab import ImageDataset
 
 
 def get_unique_ab_pairs(dataset):

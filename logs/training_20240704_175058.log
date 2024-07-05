@@ -1,0 +1,12 @@
+2024-07-04 17:50:58,653 - INFO - Logging setup complete. Log file: Image-Colorisation/logs/training_20240704_175058.log
+2024-07-04 17:51:02,204 - INFO - Model file: Model_Inception.pth
+2024-07-04 17:56:05,457 - INFO - Model: Model_Inception.pth, Epoch 1/10, Training Loss: 0.09891360059004872, Validation Loss: 0.09653609668215116
+2024-07-04 18:01:00,176 - INFO - Model: Model_Inception.pth, Epoch 2/10, Training Loss: 0.09665629443000345, Validation Loss: 0.09607741981744766
+2024-07-04 18:05:55,773 - INFO - Model: Model_Inception.pth, Epoch 3/10, Training Loss: 0.09649179932199606, Validation Loss: 0.09590430433551471
+2024-07-04 18:10:51,094 - INFO - Model: Model_Inception.pth, Epoch 4/10, Training Loss: 0.09636955892964572, Validation Loss: 0.09618498409787814
+2024-07-04 18:15:46,720 - INFO - Model: Model_Inception.pth, Epoch 5/10, Training Loss: 0.09632274107772763, Validation Loss: 0.0964643600086371
+2024-07-04 18:20:38,378 - INFO - Model: Model_Inception.pth, Epoch 6/10, Training Loss: 0.09626418183080289, Validation Loss: 0.09581036865711212
+2024-07-04 18:25:25,769 - INFO - Model: Model_Inception.pth, Epoch 7/10, Training Loss: 0.0962363202907458, Validation Loss: 0.09613275279601415
+2024-07-04 18:30:12,175 - INFO - Model: Model_Inception.pth, Epoch 8/10, Training Loss: 0.09616494416689672, Validation Loss: 0.09577886387705803
+2024-07-04 18:35:00,778 - INFO - Model: Model_Inception.pth, Epoch 9/10, Training Loss: 0.09612010244060964, Validation Loss: 0.09595466529329617
+2024-07-04 18:39:46,218 - INFO - Model: Model_Inception.pth, Epoch 10/10, Training Loss: 0.09610333015062228, Validation Loss: 0.09578266491492589

@@ -1,6 +1,0 @@
-2024-07-02 22:49:20,210 - INFO - Logging setup complete. Log file: logs/training_20240702_224920.log
-2024-07-02 22:50:12,875 - INFO - Model: Model_RGB.pth, Epoch 1/10, Training Loss: 0.12069790810346603, Validation Loss: 0.1910165697336197 
-2024-07-02 22:51:03,901 - INFO - Model: Model_RGB.pth, Epoch 2/10, Training Loss: 0.10411430895328522, Validation Loss: 0.12817659974098206 
-2024-07-02 22:51:50,508 - INFO - Model: Model_RGB.pth, Epoch 3/10, Training Loss: 0.1037618562579155, Validation Loss: 0.1126159206032753 
-2024-07-02 22:52:39,482 - INFO - Model: Model_RGB.pth, Epoch 4/10, Training Loss: 0.10148135870695114, Validation Loss: 0.10930975526571274 
-2024-07-02 22:53:26,983 - INFO - Model: Model_RGB.pth, Epoch 5/10, Training Loss: 0.10138731598854064, Validation Loss: 0.10814487934112549 
