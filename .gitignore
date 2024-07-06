@@ -12,11 +12,4 @@ output_rgb
 output_sketch
 .vscode
 
-output_Model_lab
-output_Model_lab_sketches
-output_Model_RGB
-output_Model_RGB_sketch
-output_Ref_Model_RGB
-output_Ref_Model_RGB_sketch
-output_Model_Inception
-output_Model_Inception_sketch
+Outputs
