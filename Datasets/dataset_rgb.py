@@ -8,7 +8,12 @@ from Datasets.utils import resize_and_pad
 
 
 class ImageDatasetRGB(Dataset):
-    def __init__(self, image_folder, sketch_folder=None):
+    def __init__(self, image_folder, sketch=False, sketch_folder=None):
+
+        if sketch:
+            self.sketch = True
+        else:
+            self.sketch = False
         self.image_folder = image_folder
         self.image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
 

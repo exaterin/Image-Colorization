@@ -111,8 +111,8 @@ def main(args):
 
     logging.info(f"Model file: {model_name}")
 
-    train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name)
-    # test(model_path=model_name, test_loader=test_loader)
+    # train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name)
+    test(model_path=model_name, test_loader=test_loader)
 
 if __name__ == '__main__':
     args = parser.parse_args([] if "__file__" not in globals() else None)

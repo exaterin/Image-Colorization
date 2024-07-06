@@ -7,3 +7,6 @@
 2024-07-05 14:37:01,480 - INFO - Model: Model_Inception_sketch.pth, Epoch 5/10, Training Loss: 0.10267327055961144, Validation Loss: 0.11303936243057251
 2024-07-05 14:48:21,101 - INFO - Model: Model_Inception_sketch.pth, Epoch 6/10, Training Loss: 0.10255556058983843, Validation Loss: 0.1441610465447108
 2024-07-05 14:59:42,661 - INFO - Model: Model_Inception_sketch.pth, Epoch 7/10, Training Loss: 0.10218192909319862, Validation Loss: 0.11874913101394971
+2024-07-05 15:11:02,320 - INFO - Model: Model_Inception_sketch.pth, Epoch 8/10, Training Loss: 0.10205467467924126, Validation Loss: 0.11618443156282107
+2024-07-05 15:22:20,095 - INFO - Model: Model_Inception_sketch.pth, Epoch 9/10, Training Loss: 0.1024804570156486, Validation Loss: 0.11093255629142125
+2024-07-05 15:33:41,487 - INFO - Model: Model_Inception_sketch.pth, Epoch 10/10, Training Loss: 0.10195670702627727, Validation Loss: 0.12033044497172038

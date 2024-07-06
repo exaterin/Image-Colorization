@@ -104,29 +104,36 @@ def test(model_path, test_loader, dataset):
 def main(args):
     setup_logging('Image-Colorisation/logs')
 
-    dataset = DatasetLAB('images', ab_classes_path='Image-Colorisation/Datasets/ab_classes.txt', sketches_folder='sketches')
-
-    # Split the dataset into train, test and val sets
-    generator = torch.Generator().manual_seed(42)
-    train_dataset, test_dataset, val_dataset = random_split(dataset, [0.8, 0.1, 0.1], generator=generator)
-
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, pin_memory=True, num_workers=4)
-    dev_loader = DataLoader(val_dataset, batch_size=args.batch_size)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size)
-
-    model = CNNModel()
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    dataset = DatasetLAB('images', sketch=True, ab_classes_path='Image-Colorisation/Datasets/ab_classes.txt', sketches_folder='sketches')
 
 
-    model_name = 'Model_lab_sketches.pth'
+    l, onehot, name = dataset[0]
 
-    logging.info(f"Model file: {model_name}")
+    img = get_img_from_one_hot(l, onehot, dataset.ab_classes)
+    save_image(img, name, directory=f'Image-Colorisation/test')
 
-    # train(model, train_loader, dev_loader, crls
-    # iterion, optimizer, args.epochs, model_name)
 
-    test(model_path=model_name, test_loader=test_loader, dataset=dataset)
+    # # Split the dataset into train, test and val sets
+    # generator = torch.Generator().manual_seed(42)
+    # train_dataset, test_dataset, val_dataset = random_split(dataset, [0.8, 0.1, 0.1], generator=generator)
+
+    # train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, pin_memory=True, num_workers=4)
+    # dev_loader = DataLoader(val_dataset, batch_size=args.batch_size)
+    # test_loader = DataLoader(test_dataset, batch_size=args.batch_size)
+
+    # model = CNNModel()
+    # criterion = nn.CrossEntropyLoss()
+    # optimizer = optim.Adam(model.parameters(), lr=args.lr)
+
+
+    # model_name = 'Model_lab_sketches.pth'
+
+    # logging.info(f"Model file: {model_name}")
+
+    # # train(model, train_loader, dev_loader, crls
+    # # iterion, optimizer, args.epochs, model_name)
+
+    # test(model_path=model_name, test_loader=test_loader, dataset=dataset)
 
 if __name__ == '__main__':
     args = parser.parse_args([] if "__file__" not in globals() else None)
