@@ -17,11 +17,16 @@ def edge_extraction_app(image):
     )
 
     if edge_option == 'Canny edge extractor':
+
         thresh1 = st.slider('Threshold 1', min_value=0, max_value=255, value=100)
         thresh2 = st.slider('Threshold 2', min_value=0, max_value=255, value=200)
+
     elif edge_option == 'Sobel edge extractor':
+
         thresh = st.slider('Threshold', min_value=0, max_value=255, value=100)
+
     elif edge_option == 'Xdog edge extractor':
+
         gamma = st.slider('Gamma', min_value=0.0, max_value=1.0, value=0.95, step=0.05)
         sigma = st.slider('Sigma', min_value=0.1, max_value=10.0, value=1.0, step=0.1)
         k = st.slider('K', min_value=1, max_value=10, value=3)
@@ -30,6 +35,7 @@ def edge_extraction_app(image):
 
     if st.button('Apply Edge Extraction'):
         modified_image = None
+        
         if edge_option == 'Canny edge extractor':
             modified_image = canny(image, thresh1=thresh1, thresh2=thresh2)
         elif edge_option == 'Sobel edge extractor':
@@ -38,9 +44,9 @@ def edge_extraction_app(image):
             modified_image = xdog(image, gamma=gamma, sigma=sigma, k=k, epsilon=epsilon, phi=phi)
 
         col1, col2 = st.columns(2)
-        col1.image(image, caption='Original Image', use_column_width=True)
+        col1.image(image, caption='Original Image', use_column_width=True, width=300) 
 
-        col2.image(modified_image, caption='Extracted edges', use_column_width=True)
+        col2.image(modified_image, caption='Extracted edges', use_column_width=True, width=300)
 
     st.markdown("---")
     st.markdown("### Compare Edge Extractors")

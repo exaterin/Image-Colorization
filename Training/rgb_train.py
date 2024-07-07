@@ -21,6 +21,7 @@ parser.add_argument("--batch_size", default=32, type=int, help="Batch size.")
 parser.add_argument("--epochs", default=10, type=int, help="Number of epochs.")
 parser.add_argument("--lr", default=0.001, type=float, help="Learning rate.")
 parser.add_argument("--image_folder", default="images", type=str, help="Path to the image folder.")
+parser.add_argument("--sketchfolder", default="sketches", type=str, help="Path to the sketch folder.")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -96,7 +97,7 @@ def main(args):
 
     setup_logging('logs')
 
-    dataset = ImageDatasetRGB(args.image_folder, 'sketches')
+    dataset = ImageDatasetRGB(args.image_folder, args.sketch_folder)
 
     # Split the dataset into train, test and val sets
     generator = torch.Generator().manual_seed(42)

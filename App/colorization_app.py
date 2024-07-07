@@ -57,6 +57,7 @@ def load_model(model_type, image_type=None):
 
     model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     model.eval()
+
     return model
 
 
@@ -107,8 +108,6 @@ def enhance(image):
     enhanced_image = saturation_enhancer.enhance(0.5) 
 
     return enhanced_image
-
-
 
 
 def crop_to_original_size(image_array, original_image):
