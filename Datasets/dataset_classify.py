@@ -18,15 +18,17 @@ class ImageSketchDataset(Dataset):
 
     def __getitem__(self, idx):
         image_path = self.files[idx]
-        image = Image.open(image_path).convert('L')
-
-        image = resize_and_pad(image)
+        image = Image.open(image_path).convert('RGB')
         label = self.labels[idx]
 
+        image = resize_and_pad(image)
+
+        # Convert the RGB image to grayscale
+        image = image.convert('L')
         image_array = np.array(image)
 
-        tensor = torch.from_numpy(image_array).unsqueeze(0).float() 
+        tensor = torch.from_numpy(image_array).unsqueeze(0).float()  # Add channel dimension
 
-        image =  tensor / 255.0
+        image = tensor / 255.0
 
         return image, label

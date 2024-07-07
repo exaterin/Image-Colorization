@@ -5,8 +5,11 @@ import torch.optim as optim
 from tqdm import tqdm
 import logging
 import os
+import sys
 from datetime import datetime
 from torch.utils.data import DataLoader, random_split
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image-Colorisation')))
 
 from Datasets.dataset_classify import ImageSketchDataset
 from Models.classify_model import ImageClassifier
