@@ -106,7 +106,7 @@ def save_rgb_image(rgb_image, image_name, directory='output_images'):
 def crop_black_borders(image_array, black_value):
 
     # Find the bounding box of the non-black regions
-    non_black_pixels = np.where(image_array > black_value)
+    non_black_pixels = np.where(image_array >= black_value)
     top = np.min(non_black_pixels[0])
     bottom = np.max(non_black_pixels[0])
     left = np.min(non_black_pixels[1])

@@ -18,14 +18,14 @@ class ImageSketchDataset(Dataset):
 
     def __getitem__(self, idx):
         image_path = self.files[idx]
-        image = Image.open(image_path).convert('RGB')
+        image = Image.open(image_path).convert('L')
 
         image = resize_and_pad(image)
         label = self.labels[idx]
 
         image_array = np.array(image)
 
-        tensor = torch.from_numpy(image_array.transpose((2, 0, 1))).float()
+        tensor = torch.from_numpy(image_array).unsqueeze(0).float() 
 
         image =  tensor / 255.0
 

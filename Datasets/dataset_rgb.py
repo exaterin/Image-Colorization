@@ -22,33 +22,6 @@ class ImageDatasetRGB(Dataset):
 
     def __len__(self):
         return len(self.image_files)
-    
-
-
-    # def __getitem__(self, idx):
-    #     image_name = self.image_files[idx]
-
-    #     image_path = os.path.join(self.image_folder, image_name)
-    #     image = Image.open(image_path).convert('RGB')  # Ensure image is in RGB
-    #     image = resize_and_pad(image)
-    #     image_np = np.array(image)
-
-    #     sketch_path = os.path.join(self.sketch_folder, image_name)
-    #     sketch = Image.open(sketch_path).convert('RGB')
-    #     sketch = resize_and_pad(sketch)
-    #     sketch_np = np.array(sketch)
-
-    #     # Get grayscale image
-    #     sketch_image = Image.fromarray(sketch_np).convert('L')
-    #     sketch_image = np.array(sketch_image).astype(np.float32) / 255.0
-    #     sketch_image = sketch_image[:, :, np.newaxis]  # Add a channel dimension
-
-    #     # Normalize RGB image
-    #     rgb_image = image_np.astype(np.float32) / 255.0
-
-    #     img_name = os.path.basename(image_path).split('.')[0]
-
-    #     return sketch_image, rgb_image, img_name
 
     def __getitem__(self, idx):
         image_name = self.image_files[idx]
@@ -61,14 +34,19 @@ class ImageDatasetRGB(Dataset):
         # Convert image to numpy array
         image_np = np.array(image)
 
-        # Get grayscale image
-        gray_image = Image.fromarray(image_np).convert('L')
-        gray_image = np.array(gray_image).astype(np.float32) / 255.0
-        gray_image = gray_image[:, :, np.newaxis]  # Add a channel dimension
+        if sketch:
+            sketch_path = os.path.join(self.sketch_folder, image_name)
+            sketch = Image.open(sketch_path).convert('RGB')
+            sketch = resize_and_pad(sketch)
+            image_np = np.array(sketch)
+
+        grey_image = Image.fromarray(image_np).convert('L')
+        grey_image = np.array(grey_image).astype(np.float32) / 255.0
+        grey_image = grey_image[:, :, np.newaxis]  # Add a channel dimension
 
         # Normalize RGB image
         rgb_image = image_np.astype(np.float32) / 255.0
 
         img_name = os.path.basename(image_path).split('.')[0]
 
-        return gray_image, rgb_image, img_name
+        return grey_image, rgb_image, img_name
