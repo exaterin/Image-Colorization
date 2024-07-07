@@ -1,5 +1,6 @@
 from cgitb import grey
 from json import load
+import re
 import streamlit as st
 from PIL import Image
 import numpy as np
@@ -10,7 +11,7 @@ from PIL import Image, ImageEnhance
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorisation')))
 
-from Datasets.utils import resize_and_pad
+from Datasets.utils import resize_and_pad, apply_gaussian_blur, extract_features
 
 from Models.rgb_model import ModelRGB
 from Models.ccnn_model import RefcCNNModel
@@ -27,15 +28,29 @@ def load_model(model_type, image_type=None):
 
     elif model_type == 'Base Model':
         model = ModelRGB()
-        model_path = "Weights/Model_RGB.pth"
+
+        if image_type == 'photo':
+            model_path = "Weights/Model_RGB.pth"
+
+        else:
+            model_path = "Weights/Model_RGB_sketch.pth"
+
 
     elif model_type == 'User-guided Model':
         model = RefcCNNModel()
-        model_path = "Weights/Model_RGB.pth"
+
+        if image_type == 'photo':
+            model_path = "Weights/Ref_Model_RGB.pth"
+        else:
+            model_path = "Weights/Ref_Model_RGB_sketch.pth"
 
     elif model_type == 'Model with Resnet-Inception features':
         model = ModelInception()
-        model_path = "Weights/Model_RGB.pth" 
+
+        if image_type == 'photo':
+            model_path = "Weights/Model_Inception.pth"
+        else:
+            model_path = "Weights/Model_Inception_sketch.pth"
 
     else:
         raise ValueError("Unknown model type")
@@ -45,15 +60,22 @@ def load_model(model_type, image_type=None):
     return model
 
 
-def preprocess_image(image):
+def preprocess_image(image, reference=False):
     image = resize_and_pad(image)
-    image_np = np.array(image)
-    grey_image = Image.fromarray(image_np).convert('L')
-    grey_image = np.array(grey_image).astype(np.float32) / 255.0
-    grey_image = grey_image[np.newaxis, :, :]  # Add channel dimension
-    grey_image = grey_image[np.newaxis, :, :, :]  # Add batch dimension
+    if not reference:
+        image = image.convert('L')
+    
+    image_np = np.array(image).astype(np.float32) / 255.0
 
-    return grey_image
+    if not reference:
+        image_np = image_np[np.newaxis, :, :]  # Add channel dimension for grayscale
+    else:
+        image_np = image_np.transpose((2, 0, 1))  # Change from HWC to CHW format for RGB
+
+    image_np = image_np[np.newaxis, :, :, :]  # Add batch dimension
+
+    return image_np
+
 
 def postprocess_image(output, original_image):
 
@@ -70,15 +92,23 @@ def postprocess_image(output, original_image):
 
 
 def enhance(image):
-    enhancer = ImageEnhance.Contrast(image)
-    enhanced_image = enhancer.enhance(2)
+    # Convert to NumPy array and subtract 50 from pixel values
+    image_np = np.array(image).astype(np.float32)
+    image_np = np.clip(image_np - 110, 0, 255).astype(np.uint8)
+    
+    # Convert back to PIL Image
+    image = Image.fromarray(image_np)
 
-    image_np = np.array(enhanced_image)
-    
-    image_np = np.clip(image_np - 50, 0, 255).astype(np.uint8)
-    enhanced_image = Image.fromarray(image_np)
-    
+    # Adjust brightness
+    brightness_enhancer = ImageEnhance.Brightness(image)
+    bright_image = brightness_enhancer.enhance(3)  # Increase brightness by a factor of 1.5
+
+    saturation_enhancer = ImageEnhance.Color(bright_image)
+    enhanced_image = saturation_enhancer.enhance(0.5) 
+
     return enhanced_image
+
+
 
 
 def crop_to_original_size(image_array, original_image):
@@ -92,6 +122,21 @@ def crop_to_original_size(image_array, original_image):
     return cropped_image
 
 
+def classify(image):
+
+    model = load_model('Classifier')
+    grey_image = preprocess_image(image)
+
+    grey_image_tensor = torch.tensor(grey_image)
+
+    with torch.no_grad():
+        output = model(grey_image_tensor)
+
+    label = torch.argmax(output).item()
+
+    return label
+
+
 def colorisation_app(image):
     st.markdown("### Image Colorisation Models")
     
@@ -103,43 +148,110 @@ def colorisation_app(image):
     )
 
     if color_model == 'Base Model':
-        model = load_model('Classifier')
+        label = classify(image)
+
+        # For photo
+        if label == 0:
+            model = load_model(color_model, 'photo')
+
+        # Sketch
+        else:
+            model = load_model(color_model, 'sketch')
+
         grey_image = preprocess_image(image)
 
-        grey_image_tensor = torch.tensor(grey_image)
+        if st.button('Apply Colorisation'):
 
-        with torch.no_grad():
-            output = model(grey_image_tensor)
+            grey_image = preprocess_image(image)
 
-        print(output)
+            grey_image_tensor = torch.tensor(grey_image)
 
-        # model = load_model('Base Model')
-        # grey_image = preprocess_image(image)
+            with torch.no_grad():
+                output = model(grey_image_tensor)
 
-        # if st.button('Apply Colorisation'):
-        #     if color_model == 'Base Model':
+            colorized_image = postprocess_image(output, image)
 
-        #         grey_image = preprocess_image(image)
+            grey_image = image.convert('L')
 
-        #         grey_image_tensor = torch.tensor(grey_image)
-
-        #         with torch.no_grad():
-        #             output = model(grey_image_tensor)
-
-        #         colorized_image = postprocess_image(output, image)
-
-        #         grey_image = image.convert('L')
-
-        #         col1, col2 = st.columns(2)
-        #         col1.image(grey_image , caption="Input Image", use_column_width=True)
-        #         col2.image(colorized_image, caption="Colorized Image", use_column_width=True)
+            col1, col2 = st.columns(2)
+            col1.image(grey_image , caption="Input Image", use_column_width=True)
+            col2.image(colorized_image, caption="Colorized Image", use_column_width=True)
 
     elif color_model == 'User-guided Model':
 
         reference_file = st.file_uploader("Upload a reference image", type=["jpg", "png", "jpeg"])
         if reference_file is not None:
             reference_image = Image.open(reference_file)
-            st.image(reference_image, caption='Reference Image', use_column_width=True)
 
-        model = load_model('User-guided Model')
+        label = classify(image)
+
+        # For photo
+        if label == 0:
+            model = load_model(color_model, 'photo')
+
+        # Sketch
+        else:
+            model = load_model(color_model, 'sketch')
+
+        if st.button('Apply Colorisation') and reference_file is not None:
+
+            reference = apply_gaussian_blur(reference_image)
+            reference_image = Image.fromarray(reference)
+            reference_image = preprocess_image(reference_image, reference=True)
+
+            grey_image = preprocess_image(image)
+
+            reference_tensor = torch.tensor(reference_image)
+            grey_tensor = torch.tensor(grey_image)
+
+            with torch.no_grad():
+                output = model(grey_tensor, reference_tensor)
+
+
+            colorized_image = postprocess_image(output, image)
+
+            grey_image = image.convert('L')
+
+            col1, col2, col3 = st.columns(3)
+            col1.image(grey_image , caption="Input Image", use_column_width=True)
+            col2.image(reference , caption="Reference Image", use_column_width=True)
+            col3.image(colorized_image, caption="Colorized Image", use_column_width=True)
+
+    elif color_model == 'Model with Resnet-Inception features':
+        label = classify(image)
+
+        # For photo
+        if label == 0:
+            model = load_model(color_model, 'photo')
+
+        # Sketch
+        else:
+            model = load_model(color_model, 'sketch')
+
+        features = extract_features(image)
+
         grey_image = preprocess_image(image)
+
+        if st.button('Apply Colorisation'):
+
+            grey_image = preprocess_image(image)
+
+            grey_image_tensor = torch.tensor(grey_image)
+
+            features_tensor = torch.tensor(features).float()
+
+            with torch.no_grad():
+                output = model(grey_image_tensor, features_tensor)
+
+            colorized_image = postprocess_image(output, image)
+
+            grey_image = image.convert('L')
+
+            col1, col2 = st.columns(2)
+            col1.image(grey_image , caption="Input Image", use_column_width=True)
+            col2.image(colorized_image, caption="Colorized Image", use_column_width=True)
+
+    
+
+            
+

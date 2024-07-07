@@ -1,15 +1,15 @@
+import sys
+import os
 import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 import logging
-import os
-import sys
 from datetime import datetime
 from torch.utils.data import DataLoader, random_split
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image-Colorisation')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorisation')))
 
 from Datasets.dataset_classify import ImageSketchDataset
 from Models.classify_model import ImageClassifier
@@ -81,7 +81,7 @@ def train(model, train_loader, dev_loader, criterion, optimizer, epochs, log_fil
         print(f"Epoch {epoch+1}/{epochs}, Training Loss: {training_loss}, Training Accuracy: {train_accuracy}%, Validation Loss: {validation_loss}, Validation Accuracy: {val_accuracy}%")
 
     # Save the trained model
-    model_path = os.path.join(os.path.dirname(log_file), "Model_Classification.pth")
+    model_path = os.path.join("Model_Classification.pth")
     torch.save(model.state_dict(), model_path)
     logging.info("Model saved to " + model_path)
 

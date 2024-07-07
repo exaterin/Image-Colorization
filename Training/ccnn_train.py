@@ -1,14 +1,14 @@
+import os
+import sys
 import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 import logging
-import os
 from datetime import datetime
-from PIL import Image
-import numpy as np
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorisation')))
 
 from torch.utils.data import random_split, DataLoader
 from Models.ccnn_model import RefcCNNModel
@@ -20,6 +20,7 @@ parser.add_argument("--batch_size", default=32, type=int, help="Batch size.")
 parser.add_argument("--epochs", default=10, type=int, help="Number of epochs.")
 parser.add_argument("--lr", default=0.001, type=float, help="Learning rate.")
 parser.add_argument("--image_folder", default="images", type=str, help="Path to the image folder.")
+parser.add_argument("--sketch_folder", default="sketches", type=str, help="Path to the sketches folder.")
 parser.add_argument("--reference_folder", default="references", type=str, help="Path to the reference image folder.")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -36,74 +37,77 @@ def setup_logging(log_dir):
 def train(model, train_loader, dev_loader, criterion, optimizer, epochs, model_name):
     model.to(device)
     for epoch in range(epochs):
+        # Set the model to training mode
         model.train()
         running_loss = 0.0
         train_loader_tqdm = tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}")
 
-        for gray_images, rgb_images, ref_images, _ in train_loader_tqdm:
-            gray_images, rgb_images, ref_images = gray_images.to(device).float(), rgb_images.to(device).float(), ref_images.to(device).float()
-            gray_images = gray_images.permute(0, 3, 1, 2)
+        for grey_images, rgb_images, ref_images, _ in train_loader_tqdm:
+            grey_images, rgb_images, ref_images = grey_images.to(device).float(), rgb_images.to(device).float(), ref_images.to(device).float()
+            grey_images = grey_images.permute(0, 3, 1, 2)
             rgb_images = rgb_images.permute(0, 3, 1, 2)
             ref_images = ref_images.permute(0, 3, 1, 2)
             
+            # Zero the gradients
             optimizer.zero_grad()
-            outputs = model(gray_images, ref_images)
+            outputs = model(grey_images, ref_images)  # Forward pass
             
             loss = criterion(outputs, rgb_images)
             loss.backward()
-            optimizer.step()
+            optimizer.step() # Update weights
             running_loss += loss.item()
-            train_loader_tqdm.set_postfix(loss=loss.item())
+            train_loader_tqdm.set_postfix(loss=loss.item()) # Display loss
             
-
+        # Set the model to evaluation mode
         model.eval()
         val_loss = 0.0
         with torch.no_grad():
-            for gray_images, rgb_images, ref_images, _ in dev_loader:
-                gray_images, rgb_images, ref_images = gray_images.to(device).float(), rgb_images.to(device).float(), ref_images.to(device).float()
-                gray_images = gray_images.permute(0, 3, 1, 2)
+            for grey_images, rgb_images, ref_images, _ in dev_loader:
+                grey_images, rgb_images, ref_images = grey_images.to(device).float(), rgb_images.to(device).float(), ref_images.to(device).float()
+                grey_images = grey_images.permute(0, 3, 1, 2)
                 rgb_images = rgb_images.permute(0, 3, 1, 2)
                 ref_images = ref_images.permute(0, 3, 1, 2)
                 
-                outputs = model(gray_images, ref_images)
+                outputs = model(grey_images, ref_images)
                 loss = criterion(outputs, rgb_images)
                 val_loss += loss.item()
 
-        
-        logging.info(f"Model: {model_name}, Epoch {epoch+1}/{epochs}, Training Loss: {running_loss/len(train_loader)}, Validation Loss: {val_loss/len(dev_loader)} ")
-
+        # Log the training and validation loss
+        logging.info(f"Model: {model_name}, Epoch {epoch+1}/{epochs}, Training Loss: {running_loss/len(train_loader)}, Validation Loss: {val_loss/len(dev_loader)}")
         print(f"Epoch {epoch+1}/{epochs}, Training Loss: {running_loss/len(train_loader)}, Validation Loss: {val_loss/len(dev_loader)}")
 
-    torch.save(model.state_dict(), f'Image-Colorisation/{model_name}')
+    # Save the model
+    torch.save(model.state_dict(), f'Weights/{model_name}')
 
-def test(model_path, test_loader):
-    model = RefcCNNModel()  # Use the new model
+def test(model_path, test_loader, output_images_path):
+    model = RefcCNNModel()
     model.load_state_dict(torch.load(model_path))
     model.to(device)
-    model.eval()
+    model.eval() # Set the model to evaluation mode
 
     with torch.no_grad():
-        for gray_images, rgb_images, ref_images, image_name in tqdm(test_loader, desc="Testing"):
-            gray_images, rgb_images, ref_images = gray_images.to(device).float(), rgb_images.to(device).float(), ref_images.to(device).float()
-            gray_images = gray_images.permute(0, 3, 1, 2)
+        for grey_images, rgb_images, ref_images, image_name in tqdm(test_loader, desc="Testing"):
+            grey_images, rgb_images, ref_images = grey_images.to(device).float(), rgb_images.to(device).float(), ref_images.to(device).float()
+            grey_images = grey_images.permute(0, 3, 1, 2)
             rgb_images = rgb_images.permute(0, 3, 1, 2)
             ref_images = ref_images.permute(0, 3, 1, 2)
 
-            outputs = model(gray_images, ref_images)
+            outputs = model(grey_images, ref_images)
 
             for i in range(outputs.size(0)):
-                save_rgb_image(outputs[i], image_name[i], f'Image-Colorisation/output_{model_path}')
+                save_rgb_image(outputs[i], image_name[i], output_images_path)
 
 def main(args):
 
-    setup_logging('Image-Colorisation/logs')
+    setup_logging('logs')
 
-    dataset = DatasetRefcCNN(args.image_folder, args.reference_folder, 'sketches')
+    dataset = DatasetRefcCNN(args.image_folder, args.reference_folder, args.sketch_folder)
 
     # Split the dataset into train, test and val sets
     generator = torch.Generator().manual_seed(42)
     train_dataset, test_dataset, val_dataset = random_split(dataset, [0.8, 0.1, 0.1], generator=generator)
 
+    # Create Data Loaders
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, pin_memory=True, num_workers=4)
     dev_loader = DataLoader(val_dataset, batch_size=args.batch_size)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size)
@@ -116,9 +120,9 @@ def main(args):
 
     logging.info(f"Model file: {model_name}")
 
-    # train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name)
+    train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name)
 
-    test(model_path=model_name, test_loader=test_loader)
+    test(model_path=model_name, test_loader=test_loader, output_images_path=f'output_{model_name}')
 
 if __name__ == '__main__':
     args = parser.parse_args([] if "__file__" not in globals() else None)

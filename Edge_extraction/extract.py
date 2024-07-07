@@ -1,19 +1,7 @@
-import os
-import glob
 import numpy as np
-import argparse
 import cv2 as cv
-from skimage.io import imsave
 from skimage.color import rgb2gray
-from cv2 import GaussianBlur, imread
-import matplotlib.pyplot as plt
-import time
-
 from PIL import Image
-import numpy as np
-import cv2 as cv
-from skimage.color import rgb2gray
-
 
 # Constants for XDoG line extraction
 GAMMA = 0.95
@@ -59,6 +47,7 @@ def xdog(image, gamma=GAMMA, sigma=SIGMA, k=K, epsilon=EPSILON, phi=PHI):
     difference[~mask] = 1 + np.tanh(phi * difference[~mask])
 
     normalized_difference = (difference - difference.min()) / (difference.max() - difference.min())
+
     return Image.fromarray((normalized_difference * 255).astype(np.uint8))
 
 def sobel(image, thresh=THRESH):
@@ -100,4 +89,5 @@ def canny(image, thresh1=THRESH1, thresh2=THRESH2):
         img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
 
     edges = cv.Canny(img, thresh1, thresh2)
+
     return Image.fromarray(255 - edges)

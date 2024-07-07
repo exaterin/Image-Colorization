@@ -1,14 +1,14 @@
+import os
+import sys
 import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import matplotlib.pyplot as plt
 from tqdm import tqdm
-import logging
-import os
 from datetime import datetime
-from PIL import Image
-import numpy as np
+import logging
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorisation')))
 
 from torch.utils.data import random_split, DataLoader
 from Models.rgb_model import ModelRGB
@@ -75,7 +75,7 @@ def train(model, train_loader, dev_loader, criterion, optimizer, epochs, model_n
 
     torch.save(model.state_dict(), f'Image-Colorisation/{model_name}')
 
-def test(model_path, test_loader):
+def test(model_path, test_loader, output_images_path):
     model = ModelRGB()
     model.load_state_dict(torch.load(model_path))
     model.to(device)
@@ -88,15 +88,13 @@ def test(model_path, test_loader):
             rgb_images = rgb_images.permute(0, 3, 1, 2)
 
             outputs = model(gray_images)
-
-            # print("Output min:", outputs.min().item(), "Output max:", outputs.max().item())
             
             for i in range(outputs.size(0)):
-                save_rgb_image(outputs[i], image_name[i], f'Image-Colorisation/output_{model_path}')
+                save_rgb_image(outputs[i], image_name[i], output_images_path)
 
 def main(args):
 
-    setup_logging('Image-Colorisation/logs')
+    setup_logging('logs')
 
     dataset = ImageDatasetRGB(args.image_folder, 'sketches')
 
@@ -116,20 +114,10 @@ def main(args):
 
     logging.info(f"Model file: {model_name}")
 
-    # train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name)
+    train(model, train_loader, dev_loader, criterion, optimizer, args.epochs, model_name)
 
-    test(model_path=model_name, test_loader=test_loader)
+    test(model_path=model_name, test_loader=test_loader, output_images_path=f'output_{model_name}')
 
 if __name__ == '__main__':
     args = parser.parse_args([] if "__file__" not in globals() else None)
     main(args)
-
-    # dataset = ImageDatasetRGB('images', 'sketches')
-
-    # sketch, rgb, name = dataset[0]
-    # sketch = np.squeeze(sketch, axis=2)
-
-    # sketch = (sketch * 255).astype(np.uint8)
-
-    # sketch_image = Image.fromarray(sketch)
-    # sketch_image.save(f"Image-Colorisation/{name}_sketch.png")

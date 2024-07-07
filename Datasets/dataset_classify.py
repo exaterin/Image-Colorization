@@ -19,6 +19,7 @@ class ImageSketchDataset(Dataset):
     def __getitem__(self, idx):
         image_path = self.files[idx]
         image = Image.open(image_path).convert('RGB')
+        
         label = self.labels[idx]
 
         image = resize_and_pad(image)
@@ -27,7 +28,8 @@ class ImageSketchDataset(Dataset):
         image = image.convert('L')
         image_array = np.array(image)
 
-        tensor = torch.from_numpy(image_array).unsqueeze(0).float()  # Add channel dimension
+        # Add channel dimension
+        tensor = torch.from_numpy(image_array).unsqueeze(0).float()
 
         image = tensor / 255.0
 

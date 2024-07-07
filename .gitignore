@@ -4,14 +4,8 @@ __pycache__/
 
 Papers
 Images
-venv
-Model1.keras
-output
-output_new
-output_rgb
-output_sketch
-.vscode
 
 Outputs
 Weights
 
+.vscode

@@ -9,7 +9,7 @@ class ImageClassifier(nn.Module):
         self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
         self.act2 = nn.ReLU()
         self.pool2 = nn.MaxPool2d(2)
-        self.fc1 = nn.Linear(32 * 64 * 64, 128)  # Adjust this if your image size is different
+        self.fc1 = nn.Linear(32 * 64 * 64, 128)
         self.act3 = nn.ReLU()
         self.fc2 = nn.Linear(128, 2)
 
