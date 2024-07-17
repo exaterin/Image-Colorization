@@ -28,7 +28,7 @@ pip install -r requirements.txt
 To run a Streamlit application. 
 
 ```bash
-streamlit run app.py
+streamlit run App/app.py
 ```
 
 ## Directory Structure
