@@ -8,7 +8,7 @@ from tqdm import tqdm
 from datetime import datetime
 import logging
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorisation')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorization')))
 
 from torch.utils.data import random_split, DataLoader
 from Models.rgb_model import ModelRGB

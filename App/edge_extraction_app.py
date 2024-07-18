@@ -3,10 +3,11 @@ from PIL import Image
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorisation')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorization')))
 
 from Edge_extraction.extract import sobel, canny, xdog
 
+# Main function
 def edge_extraction_app(image):
     st.markdown("### Edge extractors")
 
@@ -16,6 +17,7 @@ def edge_extraction_app(image):
         ('Canny edge extractor', 'Sobel edge extractor', 'Xdog edge extractor')
     )
 
+    # Configure sliders based on the chosen edge extractor
     if edge_option == 'Canny edge extractor':
 
         thresh1 = st.slider('Threshold 1', min_value=0, max_value=255, value=100)
@@ -35,6 +37,8 @@ def edge_extraction_app(image):
 
     if st.button('Apply Edge Extraction'):
         modified_image = None
+
+        image = image.convert('L')
         
         if edge_option == 'Canny edge extractor':
             modified_image = canny(image, thresh1=thresh1, thresh2=thresh2)
@@ -42,6 +46,7 @@ def edge_extraction_app(image):
             modified_image = sobel(image, thresh=thresh)
         elif edge_option == 'Xdog edge extractor':
             modified_image = xdog(image, gamma=gamma, sigma=sigma, k=k, epsilon=epsilon, phi=phi)
+
 
         col1, col2 = st.columns(2)
         col1.image(image, caption='Original Image', use_column_width=True, width=300) 

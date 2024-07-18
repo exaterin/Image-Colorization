@@ -1,11 +1,1 @@
-# Ignore Python compiled files
-*.pyc
-__pycache__/
-
-Papers
-Images
-
-Outputs
 Weights
-
-.vscode

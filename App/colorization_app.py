@@ -1,6 +1,3 @@
-from cgitb import grey
-from json import load
-import re
 import streamlit as st
 from PIL import Image
 import numpy as np
@@ -9,7 +6,7 @@ import os
 import torch
 from PIL import Image, ImageEnhance
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorisation')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorization')))
 
 from Datasets.utils import resize_and_pad, apply_gaussian_blur, extract_features
 
@@ -19,7 +16,7 @@ from Models.inception_model import ModelInception
 from Models.classify_model import ImageClassifier
 
 
-
+# Function to load a model based on its type
 def load_model(model_type, image_type=None):
 
     if model_type == 'Classifier':
@@ -55,12 +52,12 @@ def load_model(model_type, image_type=None):
     else:
         raise ValueError("Unknown model type")
 
+    # Load the model weights
     model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     model.eval()
-
     return model
 
-
+# Function to preprocess images before they are fed into the model
 def preprocess_image(image, reference=False):
     image = resize_and_pad(image)
     if not reference:
@@ -77,7 +74,7 @@ def preprocess_image(image, reference=False):
 
     return image_np
 
-
+# Function to postprocess the output from the model
 def postprocess_image(output, original_image):
 
     output = output.squeeze().permute(1, 2, 0).detach().numpy()
@@ -91,7 +88,7 @@ def postprocess_image(output, original_image):
 
     return enhanced_image
 
-
+# Function to enhance the visual appeal of an image
 def enhance(image):
     # Convert to NumPy array and subtract 50 from pixel values
     image_np = np.array(image).astype(np.float32)
@@ -109,7 +106,7 @@ def enhance(image):
 
     return enhanced_image
 
-
+# Function to crop an image to match the original size
 def crop_to_original_size(image_array, original_image):
 
     original_image.thumbnail((256, 256), Image.ANTIALIAS)
@@ -120,7 +117,7 @@ def crop_to_original_size(image_array, original_image):
     cropped_image = image_array[start_y:start_y + height, start_x:start_x + width]
     return cropped_image
 
-
+# Function to classify images using a preloaded model
 def classify(image):
 
     model = load_model('Classifier')
@@ -135,7 +132,7 @@ def classify(image):
 
     return label
 
-
+# Main function
 def colorisation_app(image):
     st.markdown("### Image Colorisation Models")
     

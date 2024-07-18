@@ -9,7 +9,7 @@ from torch.utils.data import random_split, DataLoader
 from datetime import datetime
 from tqdm import tqdm
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorisation')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../Image Colorization')))
 
 from Models.inception_model import ModelInception
 from Datasets.dataset_inception import ImageDatasetInception
