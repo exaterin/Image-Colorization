@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# Implementation of the CNN with Inception features model
 class ModelInception(nn.Module):
     def __init__(self):
         super(ModelInception, self).__init__()

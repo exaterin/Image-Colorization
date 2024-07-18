@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# Implementation of the Base model
 class ModelRGB(nn.Module):
     def __init__(self):
         super(ModelRGB, self).__init__()

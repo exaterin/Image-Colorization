@@ -6,6 +6,7 @@ import torch
 
 from Datasets.utils import resize_and_pad
 
+# Implementation of a dataset class for the classification model
 class ImageSketchDataset(Dataset):
     def __init__(self, photos_dir, sketches_dir):
         self.photos_files = [os.path.join(photos_dir, f) for f in os.listdir(photos_dir) if os.path.isfile(os.path.join(photos_dir, f))]

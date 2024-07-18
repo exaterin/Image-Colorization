@@ -25,6 +25,7 @@ parser.add_argument("--log_dir", default="logs", type=str, help="Directory to sa
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# Logging
 def setup_logging(log_dir):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -34,6 +35,7 @@ def setup_logging(log_dir):
     logging.info("Logging setup complete. Log file: " + log_file)
     return log_file
 
+# Training part
 def train(model, train_loader, dev_loader, criterion, optimizer, epochs, log_file):
     model.to(device)
     for epoch in range(epochs):

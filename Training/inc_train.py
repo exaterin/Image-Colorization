@@ -24,6 +24,7 @@ parser.add_argument("--feature_folder", default="features_sketches", type=str, h
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# Logging
 def setup_logging(log_dir):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -33,6 +34,7 @@ def setup_logging(log_dir):
                         format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info(f"Logging setup complete. Log file: {log_file}")
 
+# Training part
 def train(model, train_loader, dev_loader, criterion, optimizer, epochs, model_name):
     model.to(device)
     for epoch in range(epochs):
@@ -75,6 +77,7 @@ def train(model, train_loader, dev_loader, criterion, optimizer, epochs, model_n
 
     torch.save(model.state_dict(), f'Image-Colorisation/{model_name}')
 
+# Testing part
 def test(model_path, test_loader, output_images_path):
     model = ModelInception()
     model.load_state_dict(torch.load(model_path))

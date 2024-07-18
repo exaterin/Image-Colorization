@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 
 from Datasets.utils import resize_and_pad
 
+# Implementation of a dataset class for the Base model
 class ImageDatasetRGB(Dataset):
     def __init__(self, image_folder, sketch=False, sketch_folder=None):
         self.sketch = sketch
